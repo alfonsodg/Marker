@@ -181,28 +181,29 @@ img {
   unicode-bidi: plaintext;
 }
 
-/* Mermaid diagrams: force A4 page size per diagram */
+/* Mermaid diagrams: scale to fill A4 page */
 .mermaid {
-  width: 210mm;
-  min-height: 297mm;
-  overflow: visible;
+  width: 100%;
+  min-height: 500px;
+  overflow: auto;
   page-break-inside: avoid;
-  margin: 20px auto;
+  margin: 30px 0;
+  text-align: center;
 }
 
 .mermaid svg {
-  width: 210mm !important;
-  min-height: 280mm !important;
   max-width: none !important;
+  min-width: 800px;
   height: auto !important;
+  transform-origin: top left;
 }
 
 .mermaid svg text {
-  font-size: 14px !important;
+  font-size: 16px !important;
 }
 
 .mermaid svg .edgeLabel {
-  font-size: 12px !important;
+  font-size: 14px !important;
 }
 
 .mermaid svg .node rect,
