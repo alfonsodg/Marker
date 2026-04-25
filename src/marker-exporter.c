@@ -19,7 +19,6 @@
  *
  */
 
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -74,26 +73,37 @@ marker_exporter_export_pandoc(const char*        markdown,
   char* path = marker_string_filename_get_path(outfile);
   if (chdir(path) == 0)
   {
-    FILE* fp = NULL;
-    fp = fopen(ftmp, "w");
+    FILE* fp = fopen(ftmp, "w");
     if (fp)
     {
       fputs(markdown, fp);
       fclose(fp);
-      char* command = NULL;
 
-      asprintf(&command,
-               "pandoc -s -c \"%s\" -o \"%s\" \"%s\"",
-               stylesheet_path,
-               outfile,
-               ftmp);
+      /* Use g_spawn_sync to avoid shell injection via filenames (#1) */
+      gchar *argv[] = {
+        "pandoc", "-s",
+        "-c", (gchar*)stylesheet_path,
+        "-o", (gchar*)outfile,
+        (gchar*)ftmp,
+        NULL
+      };
 
-      if (command)
-      {
-        system(command);
+      GError *error = NULL;
+      gint exit_status;
+      gboolean ok = g_spawn_sync(
+        NULL, argv, NULL,
+        G_SPAWN_SEARCH_PATH,
+        NULL, NULL, NULL, NULL,
+        &exit_status, &error);
+
+      if (!ok) {
+        g_warning("marker-exporter: pandoc spawn failed: %s", error->message);
+        g_error_free(error);
+      } else if (!g_spawn_check_exit_status(exit_status, &error)) {
+        g_warning("marker-exporter: pandoc exited with error: %s", error->message);
+        g_error_free(error);
       }
 
-      free(command);
       remove(ftmp);
     }
   }
