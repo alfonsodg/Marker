@@ -241,6 +241,29 @@ search_previous     (GtkEntry         *entry,
 }
 
 static void
+editor_scroll_changed_cb (GtkAdjustment *adj,
+                          gpointer       user_data)
+{
+  MarkerEditor *editor = MARKER_EDITOR (user_data);
+  if (editor->view_mode != DUAL_PANE_MODE)
+    return;
+
+  gdouble value = gtk_adjustment_get_value (adj);
+  gdouble upper = gtk_adjustment_get_upper (adj);
+  gdouble page = gtk_adjustment_get_page_size (adj);
+
+  if (upper <= page)
+    return;
+
+  gdouble ratio = value / (upper - page);
+  g_autofree gchar *script = g_strdup_printf (
+    "window.scrollTo(0, (document.body.scrollHeight - window.innerHeight) * %f);",
+    ratio);
+  webkit_web_view_run_javascript (
+    WEBKIT_WEB_VIEW (editor->preview), script, NULL, NULL, NULL);
+}
+
+static void
 marker_editor_init (MarkerEditor *editor)
 {
   editor->file = NULL;
@@ -301,6 +324,11 @@ marker_editor_init (MarkerEditor *editor)
   editor->source_scroll = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new (NULL, NULL));
   gtk_widget_show (GTK_WIDGET (editor->source_scroll));
   gtk_container_add (GTK_CONTAINER (editor->source_scroll), GTK_WIDGET (editor->source_view));
+
+  /* Scroll sync: editor scroll → preview scroll (#22) */
+  GtkAdjustment *vadj = gtk_scrolled_window_get_vadjustment (editor->source_scroll);
+  g_signal_connect (vadj, "value-changed", G_CALLBACK (editor_scroll_changed_cb), editor);
+
   GtkTextBuffer *buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (editor->source_view));
   g_signal_connect (buffer, "changed", G_CALLBACK (buffer_changed_cb), editor);
 
