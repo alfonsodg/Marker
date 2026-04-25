@@ -181,14 +181,15 @@ img {
   unicode-bidi: plaintext;
 }
 
-/* Mermaid diagrams: full width and readable size */
+/* Mermaid diagrams: force full width and readable size */
 .mermaid {
   width: 100%;
   overflow-x: auto;
 }
 
 .mermaid svg {
-  width: 100%;
-  min-height: 300px;
-  max-width: 100%;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 400px;
+  height: auto !important;
 }

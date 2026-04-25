@@ -180,7 +180,7 @@ html_footer(MarkerMathJSMode     mathjs_mode,
       mermaid_render = g_strdup(" ");
       break;
     default:
-      mermaid_render = g_strdup("<script>mermaid.initialize({startOnLoad:true});</script>");
+      mermaid_render = g_strdup("<script>mermaid.initialize({startOnLoad:true, useMaxWidth:true, flowchart:{useMaxWidth:true}, sequence:{useMaxWidth:true}});</script>");
       break;
   }
 
