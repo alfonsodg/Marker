@@ -122,7 +122,11 @@ char* html_header(MarkerMathJSMode    mathjs_mode,
       break;
   }
 
-  char * buffer = g_strdup_printf("%s\n%s\n%s\n%s\n%s\n%s\n",mathjs_css, highlight_css, mathjs_script, mathjs_auto, highlight_script, mermaid_script);
+  char * buffer = g_strdup_printf("<meta http-equiv=\"Content-Security-Policy\" "
+    "content=\"default-src 'none'; style-src 'self' 'unsafe-inline' file:; "
+    "img-src 'self' data: file:; font-src 'self' data: file:; "
+    "script-src 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com file:;\">\n"
+    "%s\n%s\n%s\n%s\n%s\n%s\n",mathjs_css, highlight_css, mathjs_script, mathjs_auto, highlight_script, mermaid_script);
 
   g_free(mathjs_script);
   g_free(mathjs_auto);

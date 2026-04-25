@@ -299,14 +299,15 @@ MarkerPreview*
 marker_preview_new(void)
 {
   MarkerPreview * obj =  g_object_new(MARKER_TYPE_PREVIEW, NULL);
-  webkit_web_view_set_zoom_level (WEBKIT_WEB_VIEW (obj), makrer_prefs_get_zoom_level ());
-  
 
-  /***
-  WebKitSettings * settings = webkit_web_view_get_settings(WEBKIT_WEB_VIEW(obj));
-  webkit_settings_set_enable_write_console_messages_to_stdout(settings, TRUE);
-  webkit_web_view_set_settings(WEBKIT_WEB_VIEW(obj), settings);
-  ***/
+  /* Restrict WebKit to prevent XSS from malicious Markdown (#2) */
+  WebKitSettings *settings = webkit_web_view_get_settings(WEBKIT_WEB_VIEW(obj));
+  webkit_settings_set_enable_javascript(settings, FALSE);
+  webkit_settings_set_allow_modal_dialogs(settings, FALSE);
+  webkit_settings_set_allow_file_access_from_file_urls(settings, FALSE);
+  webkit_settings_set_allow_universal_access_from_file_urls(settings, FALSE);
+
+  webkit_web_view_set_zoom_level (WEBKIT_WEB_VIEW (obj), marker_prefs_get_zoom_level ());
 
   return obj;
 }
@@ -389,6 +390,13 @@ marker_preview_render_markdown(MarkerPreview* preview,
                                        cursor);
 
   WebKitWebView* web_view = WEBKIT_WEB_VIEW(preview);
+
+  /* Re-enable JS only when MathJax, Highlight, or Mermaid need it (#2) */
+  gboolean needs_js = (katex_mode != MATHJS_OFF ||
+                       highlight_mode != HIGHLIGHT_OFF ||
+                       mermaid_mode != MERMAID_OFF);
+  WebKitSettings *settings = webkit_web_view_get_settings(web_view);
+  webkit_settings_set_enable_javascript(settings, needs_js);
 
   g_signal_connect(web_view,
                    "decide-policy",
