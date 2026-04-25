@@ -180,3 +180,15 @@ img {
 *:not(span){
   unicode-bidi: plaintext;
 }
+
+/* Mermaid diagrams: full width and readable size */
+.mermaid {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.mermaid svg {
+  width: 100%;
+  min-height: 300px;
+  max-width: 100%;
+}
