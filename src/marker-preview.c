@@ -387,6 +387,25 @@ marker_preview_render_markdown(MarkerPreview* preview,
                                        css_theme,
                                        cursor);
 
+  /* Inject dark mode CSS when enabled (#21) */
+  if (marker_prefs_get_use_dark_theme()) {
+    char *dark_html = g_strdup_printf(
+      "%s<style>"
+      "body{background:#1e1e2e;color:#cdd6f4;}"
+      "a{color:#89b4fa;}"
+      "code,pre{background:#313244;color:#cdd6f4;}"
+      "table,th,td{border-color:#585b70;}"
+      "th{background:#313244;}"
+      "h1,h2,h3,h4,h5,h6{color:#cba6f7;}"
+      "blockquote{border-left-color:#585b70;color:#a6adc8;}"
+      ".mermaid svg text{fill:#cdd6f4 !important;}"
+      ".mermaid svg .edgePath path{stroke:#cdd6f4 !important;}"
+      ".mermaid svg .node rect,.mermaid svg .node polygon{fill:#313244 !important;stroke:#89b4fa !important;}"
+      "</style>", html);
+    free(html);
+    html = dark_html;
+  }
+
   WebKitWebView* web_view = WEBKIT_WEB_VIEW(preview);
 
   /* Re-enable JS and file access when MathJax, Highlight, or Mermaid need it (#2) */
