@@ -34,7 +34,7 @@ on_click(WebKitDOMEventTarget * target,
         glong doc_height = webkit_dom_html_document_get_height ((WebKitDOMHTMLDocument*)document);
 
         gdouble ratio = offset / doc_height;
-        g_print("position: %f, ratio: %f\n",offset, ratio);        
+        g_debug("position: %f, ratio: %f",offset, ratio);        
     }
 }
 

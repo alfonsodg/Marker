@@ -25,7 +25,6 @@
 #include <glib/gi18n.h>
 
 #include "marker-prefs.h"
-#include "marker-string.h"
 
 #include "marker-editor.h"
 
@@ -321,8 +320,49 @@ marker_editor_init (MarkerEditor *editor)
 }
 
 static void
+marker_editor_dispose (GObject *object)
+{
+  MarkerEditor *editor = MARKER_EDITOR (object);
+
+  /* Remove refresh timer to prevent use-after-free (#3) */
+  if (editor->timer_id > 0) {
+    g_source_remove (editor->timer_id);
+    editor->timer_id = 0;
+  }
+
+  if (editor->file_monitor) {
+    g_file_monitor_cancel (editor->file_monitor);
+    g_clear_object (&editor->file_monitor);
+  }
+
+  g_clear_object (&editor->file);
+
+  if (editor->text_iter) {
+    gtk_text_iter_free (editor->text_iter);
+    editor->text_iter = NULL;
+  }
+
+  G_OBJECT_CLASS (marker_editor_parent_class)->dispose (object);
+}
+
+static void
+marker_editor_finalize (GObject *object)
+{
+  MarkerEditor *editor = MARKER_EDITOR (object);
+
+  g_free (editor->title);
+  editor->title = NULL;
+
+  G_OBJECT_CLASS (marker_editor_parent_class)->finalize (object);
+}
+
+static void
 marker_editor_class_init (MarkerEditorClass *class)
 {
+  GObjectClass *object_class = G_OBJECT_CLASS (class);
+  object_class->dispose = marker_editor_dispose;
+  object_class->finalize = marker_editor_finalize;
+
   g_signal_new ("title-changed",
                 G_TYPE_FROM_CLASS (class),
                 G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE,
@@ -447,7 +487,7 @@ marker_editor_set_view_mode (MarkerEditor   *editor,
       GtkWindow *preview_window = GTK_WINDOW (gtk_window_new (GTK_WINDOW_TOPLEVEL));
       g_signal_connect(preview_window, "delete-event", G_CALLBACK (preview_window_closed_cb), preview);
       gtk_container_add (GTK_CONTAINER (preview_window), preview);
-      gtk_window_set_title (preview_window, "Preview");
+      gtk_window_set_title (preview_window, _("Preview"));
       gtk_window_set_default_size (preview_window, 500, 600);
       gtk_widget_show_all (GTK_WIDGET (preview_window));
       gtk_widget_grab_focus (GTK_WIDGET (editor->source_view));
@@ -603,7 +643,7 @@ marker_editor_get_subtitle (MarkerEditor *editor)
   if (G_IS_FILE (file))
   {
     g_autofree gchar *path = g_file_get_path (file);
-    subtitle = marker_string_filename_get_path (path);
+    subtitle = g_path_get_dirname (path);
   }
 
   return subtitle;

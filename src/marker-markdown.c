@@ -122,7 +122,11 @@ char* html_header(MarkerMathJSMode    mathjs_mode,
       break;
   }
 
-  char * buffer = g_strdup_printf("%s\n%s\n%s\n%s\n%s\n%s\n",mathjs_css, highlight_css, mathjs_script, mathjs_auto, highlight_script, mermaid_script);
+  char * buffer = g_strdup_printf("<meta http-equiv=\"Content-Security-Policy\" "
+    "content=\"default-src 'none'; style-src 'self' 'unsafe-inline' file:; "
+    "img-src 'self' data: file:; font-src 'self' data: file:; "
+    "script-src 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com file:;\">\n"
+    "%s\n%s\n%s\n%s\n%s\n%s\n",mathjs_css, highlight_css, mathjs_script, mathjs_auto, highlight_script, mermaid_script);
 
   g_free(mathjs_script);
   g_free(mathjs_auto);
@@ -220,63 +224,53 @@ marker_markdown_css(const char* css_link)
   if (!css_link){
     return "";
   }
-  if (g_strcmp0(css_link, buffer_.location) == 0) {
+  if (g_strcmp0(css_link, buffer_.location) == 0 && buffer_.css) {
     return buffer_.css;
   } 
-  if (buffer_.location) {
-    free(buffer_.location);
-    free(buffer_.css);
-  }
+  /* Use g_free consistently — buffer_.location is g_strdup'd (#6) */
+  g_free(buffer_.location);
+  g_free(buffer_.css);
+
   buffer_.location = g_strdup(css_link);
   buffer_.css = NULL;
-  FILE* fp = NULL;
-  gchar * path = g_strdup_printf("%s%s", STYLES_DIR, css_link);
-  fp = fopen(path, "r");
-  g_free(path);
-  
-  if (fp)
-  {
-    
-    fseek(fp , 0 , SEEK_END);
-    long size = ftell(fp);
-    rewind(fp);
 
-    buffer_.css = (char*) malloc(sizeof(char) * size);
-    fread(buffer_.css, 1, size, fp);
+  gchar *path = g_strdup_printf("%s%s", STYLES_DIR, css_link);
+  gchar *contents = NULL;
+  gsize length;
+  GError *error = NULL;
 
-    fclose(fp);
+  if (g_file_get_contents(path, &contents, &length, &error)) {
+    buffer_.css = contents;
+  } else {
+    g_warning("marker_markdown_css: %s", error->message);
+    g_error_free(error);
   }
+  g_free(path);
 
-  return buffer_.css;
+  return buffer_.css ? buffer_.css : "";
 }
 
 char* 
 marker_markdown_scidown_css()
 {
-  if (buffer_.scidown != 0) {
+  if (buffer_.scidown != NULL) {
     return buffer_.scidown;
   }
 
-  buffer_.scidown = NULL;
-  FILE* fp = NULL;
-  gchar * path = g_strdup_printf("%s%s", STYLES_DIR, "scidown.css");
-  fp = fopen(path, "r");
-  g_free(path);
-  
-  if (fp)
-  {
-    
-    fseek(fp , 0 , SEEK_END);
-    long size = ftell(fp);
-    rewind(fp);
+  gchar *path = g_strdup_printf("%s%s", STYLES_DIR, "scidown.css");
+  gchar *contents = NULL;
+  gsize length;
+  GError *error = NULL;
 
-    buffer_.scidown = (char*) malloc(sizeof(char) * size);
-    fread(buffer_.scidown, 1, size, fp);
-
-    fclose(fp);
+  if (g_file_get_contents(path, &contents, &length, &error)) {
+    buffer_.scidown = contents;
+  } else {
+    g_warning("marker_markdown_scidown_css: %s", error->message);
+    g_error_free(error);
   }
+  g_free(path);
 
-  return buffer_.scidown;
+  return buffer_.scidown ? buffer_.scidown : "";
 }
 
 char*
@@ -303,7 +297,7 @@ marker_markdown_to_html(const char*         markdown,
   char * ref;
   ref = header;
   header = g_strdup_printf("%s<style>\n%s\n%s\n</style>\n", header, marker_markdown_css(stylesheet_location), marker_markdown_scidown_css());
-  free(ref);
+  g_free(ref);
 
   char * footer = html_footer(katex_mode, highlight_mode, mermaid_mode);
 
@@ -361,28 +355,19 @@ marker_markdown_to_html_with_css_inline(const char*         markdown,
   char* common_css = marker_markdown_scidown_css();
 
 
-  if(inline_css && common_css) {
+  /* CSS strings are owned by the cache — do not free them (#6) */
+  if(inline_css && *inline_css && common_css && *common_css) {
     char * old = header;
     header = g_strdup_printf("%s<style>\n%s\n%s\n</style>\n", header, inline_css, common_css);
-    free(old);
-    free(common_css);
-    free(inline_css);
-    inline_css = NULL;
-    common_css = NULL;
-  } else if (inline_css) {
+    g_free(old);
+  } else if (inline_css && *inline_css) {
     char * old = header;
     header = g_strdup_printf("%s<style>\n%s\n</style>\n", header, inline_css);
-    free(old);
-    free(inline_css);
-    inline_css = NULL;
-    common_css = NULL;
-  } else if (common_css) {
+    g_free(old);
+  } else if (common_css && *common_css) {
     char * old = header;
     header = g_strdup_printf("%s<style>\n%s\n</style>\n", header, common_css);
-    free(old);
-    free(common_css);
-    inline_css = NULL;
-    common_css = NULL;
+    g_free(old);
   }
 
 

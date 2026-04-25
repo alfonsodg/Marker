@@ -21,8 +21,6 @@
 
 #include <string.h>
 
-#include "marker-string.h"
-
 #include "marker-widget.h"
 
 void
@@ -67,7 +65,7 @@ marker_widget_combo_box_get_active_str(GtkComboBox* combo_box)
     {
       gtk_tree_model_get_value(model, &iter, 0, &value);
       const char* str = g_value_get_string(&value);
-      return marker_string_alloc(str);
+      return g_strdup(str);
     }
   }
   return NULL;

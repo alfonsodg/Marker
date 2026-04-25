@@ -78,7 +78,7 @@ char                *marker_prefs_get_highlight_theme            (void);
 void                 marker_prefs_set_highlight_theme            (const char         *theme);
 gboolean             marker_prefs_get_use_mathjs                 (void);
 void                 marker_prefs_set_use_mathjs                 (gboolean            state);
-gdouble              makrer_prefs_get_zoom_level                 (void);
+gdouble              marker_prefs_get_zoom_level                 (void);
 void                 marker_prefs_set_zoom_level                 (gdouble             val);
 gboolean             marker_prefs_get_use_highlight              (void);
 void                 marker_prefs_set_use_highlight              (gboolean            state);

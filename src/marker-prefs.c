@@ -29,7 +29,6 @@
 
 #include "marker.h"
 #include "marker-widget.h"
-#include "marker-string.h"
 #include "marker-window.h"
 
 #include "marker-prefs.h"
@@ -172,7 +171,7 @@ marker_prefs_set_use_mathjs(gboolean state)
 }
 
 gdouble
-makrer_prefs_get_zoom_level()
+marker_prefs_get_zoom_level()
 {
   return  g_settings_get_double(prefs.preview_settings, "preview-zoom-level");
 }
@@ -402,9 +401,9 @@ marker_prefs_get_available_stylesheets()
     while ((ent = readdir(dir)) != NULL)
     {
       filename = ent->d_name;
-      if (marker_string_ends_with(filename, ".css"))
+      if (g_str_has_suffix(filename, ".css"))
       {
-        list_item = marker_string_alloc(filename);
+        list_item = g_strdup(filename);
         list = g_list_prepend(list, list_item);
       }
     }
@@ -430,9 +429,13 @@ marker_prefs_get_available_highlight_themes()
     {
       filename = ent->d_name;
 
-      if (marker_string_ends_with(filename, ".css"))
+      if (g_str_has_suffix(filename, ".css"))
       {
-        list_item = marker_string_filename_get_name_noext(filename);
+        /* Get name without extension */
+        gchar *basename = g_path_get_basename(filename);
+        gchar *dot = strrchr(basename, '.');
+        if (dot) *dot = '\0';
+        list_item = basename;
         list = g_list_prepend(list, list_item);
       }
     }
@@ -462,7 +465,7 @@ marker_prefs_get_available_syntax_themes()
   for (int i = 0; ids[i] != NULL; ++i)
   {
     const gchar* id = ids[i];
-    char* item = marker_string_alloc(id);
+    char* item = g_strdup(id);
     list = g_list_prepend(list, item);
   }
 
@@ -771,10 +774,10 @@ marker_prefs_show_window()
   list = marker_prefs_get_available_stylesheets();
   marker_widget_populate_combo_box_with_strings(combo_box, list);
   char* css = marker_prefs_get_css_theme();
-  char* css_filename = marker_string_filename_get_name(css);
+  char* css_filename = g_path_get_basename(css);
   marker_widget_combo_box_set_active_str(combo_box, css_filename, g_list_length(list));
   gtk_widget_set_sensitive(GTK_WIDGET(combo_box), marker_prefs_get_use_css_theme());
-  free(css_filename);
+  g_free(css_filename);
   g_free(css);
   g_list_free_full(list, free);
   list = NULL;
@@ -896,10 +899,8 @@ marker_prefs_show_window()
   gtk_spin_button_set_value(spin_button, marker_prefs_get_tab_width());
 
   GtkWindow* window = GTK_WINDOW(gtk_builder_get_object(builder, "prefs_win"));
-	gtk_widget_show_all(GTK_WIDGET(window));
-  gtk_window_present(window);
 
-
+  /* Connect signals BEFORE showing the window to avoid race condition (#10) */
   gtk_builder_add_callback_symbol(builder,
                                   "syntax_chosen",
                                   G_CALLBACK(syntax_chosen));
@@ -973,6 +974,10 @@ marker_prefs_show_window()
                                   "enable_charter_toggled",
                                   G_CALLBACK(enable_charter_toggled));
   gtk_builder_connect_signals(builder, NULL);
+
+  /* Show window AFTER signals are connected (#10) */
+  gtk_widget_show_all(GTK_WIDGET(window));
+  gtk_window_present(window);
 
   g_object_unref(builder);
 }
