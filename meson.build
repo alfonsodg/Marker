@@ -118,6 +118,34 @@ executable(
   install : true
 )
 
+# Tests: only markdown conversion and utils (no UI deps)
+test_sources = [
+  'src/test-marker.c',
+  'src/marker-markdown.c',
+  'src/marker-utils.c',
+  'src/marker-prefs.c',
+  'src/marker-editor.c',
+  'src/marker-window.c',
+  'src/marker-exporter.c',
+  'src/marker-source-view.c',
+  'src/marker-preview.c',
+  'src/marker-widget.c',
+  'src/marker-sketcher-window.c',
+  'src/marker.c',
+  res
+]
+
+test_exe = executable(
+  'marker-test',
+  sources : [test_sources, hoedown_sources],
+  dependencies : deps,
+  link_args: '-lm',
+  c_args: ['-DMARKER_TEST_BUILD'],
+  install : false
+)
+
+test('marker-tests', test_exe)
+
 install_data(
   'data/com.github.fabiocolacio.marker.svg',
   install_dir : join_paths(DATA_DIR, 'icons/hicolor/scalable/apps')

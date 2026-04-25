@@ -378,6 +378,7 @@ marker_quit()
   }
 }
 
+#ifndef MARKER_TEST_BUILD
 int
 main(int    argc,
      char** argv)
@@ -400,3 +401,4 @@ main(int    argc,
 
   return status;
 }
+#endif /* MARKER_TEST_BUILD */

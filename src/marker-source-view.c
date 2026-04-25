@@ -253,6 +253,48 @@ default_font_changed(GSettings*   settings,
 }
 
 static void
+drag_data_received_cb (GtkWidget        *widget,
+                       GdkDragContext   *context,
+                       gint              x,
+                       gint              y,
+                       GtkSelectionData *data,
+                       guint             info,
+                       guint             time,
+                       gpointer          user_data)
+{
+  gchar **uris = gtk_selection_data_get_uris (data);
+  if (!uris)
+    return;
+
+  MarkerSourceView *source_view = MARKER_SOURCE_VIEW (widget);
+  GtkTextBuffer *buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (source_view));
+
+  for (int i = 0; uris[i] != NULL; i++) {
+    g_autofree gchar *path = g_filename_from_uri (uris[i], NULL, NULL);
+    if (!path)
+      continue;
+
+    /* Only accept image files */
+    g_autofree gchar *lower = g_ascii_strdown (path, -1);
+    if (!g_str_has_suffix (lower, ".png") &&
+        !g_str_has_suffix (lower, ".jpg") &&
+        !g_str_has_suffix (lower, ".jpeg") &&
+        !g_str_has_suffix (lower, ".gif") &&
+        !g_str_has_suffix (lower, ".svg") &&
+        !g_str_has_suffix (lower, ".webp"))
+      continue;
+
+    g_autofree gchar *img = g_strdup_printf ("![](%s)", path);
+    GtkTextIter iter;
+    gtk_text_buffer_get_iter_at_mark (buffer, &iter, gtk_text_buffer_get_insert (buffer));
+    gtk_text_buffer_insert (buffer, &iter, img, -1);
+  }
+
+  g_strfreev (uris);
+  gtk_drag_finish (context, TRUE, FALSE, time);
+}
+
+static void
 marker_source_view_init (MarkerSourceView *source_view)
 {
   GtkSourceSearchContext * search_context = gtk_source_search_context_new(GTK_SOURCE_BUFFER(gtk_text_view_get_buffer(GTK_TEXT_VIEW(source_view))),
@@ -277,6 +319,13 @@ marker_source_view_init (MarkerSourceView *source_view)
   if (marker_prefs_get_spell_check ()){
     gtk_spell_checker_attach (source_view->spell, GTK_TEXT_VIEW (source_view));
   }
+
+  /* Enable drag & drop for image files (#23) */
+  static GtkTargetEntry targets[] = { { "text/uri-list", 0, 0 } };
+  gtk_drag_dest_set (GTK_WIDGET (source_view), GTK_DEST_DEFAULT_ALL,
+                     targets, 1, GDK_ACTION_COPY);
+  g_signal_connect (source_view, "drag-data-received",
+                    G_CALLBACK (drag_data_received_cb), NULL);
 }
 
 static void
