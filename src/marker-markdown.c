@@ -245,8 +245,9 @@ marker_markdown_css(const char* css_link)
     long size = ftell(fp);
     rewind(fp);
 
-    buffer_.css = (char*) malloc(sizeof(char) * size);
-    fread(buffer_.css, 1, size, fp);
+    buffer_.css = (char*) malloc(sizeof(char) * (size + 1));
+    size_t nread = fread(buffer_.css, 1, size, fp);
+    buffer_.css[nread] = '\0';
 
     fclose(fp);
   }
@@ -274,8 +275,9 @@ marker_markdown_scidown_css()
     long size = ftell(fp);
     rewind(fp);
 
-    buffer_.scidown = (char*) malloc(sizeof(char) * size);
-    fread(buffer_.scidown, 1, size, fp);
+    buffer_.scidown = (char*) malloc(sizeof(char) * (size + 1));
+    size_t nread = fread(buffer_.scidown, 1, size, fp);
+    buffer_.scidown[nread] = '\0';
 
     fclose(fp);
   }
