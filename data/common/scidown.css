@@ -181,6 +181,16 @@ img {
   unicode-bidi: plaintext;
 }
 
+/* PDF page numbers and footer (#28) */
+@page {
+  margin: 15mm 10mm 20mm 10mm;
+  @bottom-center {
+    content: counter(page);
+    font-size: 10pt;
+    color: #666;
+  }
+}
+
 /* Mermaid diagrams: each title + diagram = exactly one A4 page */
 h3 {
   page-break-before: always;
