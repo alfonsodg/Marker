@@ -181,21 +181,20 @@ img {
   unicode-bidi: plaintext;
 }
 
-/* Mermaid diagrams: scale to fill A4 page */
+/* Mermaid diagrams: large, centered, no horizontal scroll */
 .mermaid {
   width: 100%;
   min-height: 500px;
-  overflow: auto;
+  overflow: visible;
   page-break-inside: avoid;
   margin: 30px 0;
-  text-align: left;
 }
 
 .mermaid svg {
-  max-width: none !important;
-  min-width: 800px;
+  width: 100% !important;
+  max-width: 100% !important;
   height: auto !important;
-  transform-origin: top left;
+  min-height: 500px;
 }
 
 .mermaid svg text {
