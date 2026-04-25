@@ -28,6 +28,7 @@
 #include "marker-window.h"
 
 #include <glib.h>
+#include <glib/gi18n.h>
 #include <glib/gprintf.h>
 
 #define MIN_DELTA_T 1
