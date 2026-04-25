@@ -280,9 +280,22 @@ marker_source_view_init (MarkerSourceView *source_view)
 }
 
 static void
+marker_source_view_dispose (GObject *object)
+{
+  MarkerSourceView *source_view = MARKER_SOURCE_VIEW (object);
+
+  /* Disconnect GSettings signal and clear references (#3) */
+  g_clear_object (&source_view->settings);
+  g_clear_object (&source_view->search_context);
+
+  G_OBJECT_CLASS (marker_source_view_parent_class)->dispose (object);
+}
+
+static void
 marker_source_view_class_init(MarkerSourceViewClass* class)
 {
-
+  GObjectClass *object_class = G_OBJECT_CLASS (class);
+  object_class->dispose = marker_source_view_dispose;
 }
 
 MarkerSourceView*
