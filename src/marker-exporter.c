@@ -25,7 +25,6 @@
 
 #include "marker.h"
 #include "marker-utils.h"
-#include "marker-string.h"
 #include "marker-markdown.h"
 #include "marker-prefs.h"
 #include "marker-preview.h"
@@ -70,7 +69,7 @@ marker_exporter_export_pandoc(const char*        markdown,
                               const char*        outfile)
 {
   const char* ftmp = ".marker_tmp_markdown.md";
-  char* path = marker_string_filename_get_path(outfile);
+  char* path = g_path_get_dirname(outfile);
   if (chdir(path) == 0)
   {
     FILE* fp = fopen(ftmp, "w");
@@ -274,7 +273,7 @@ marker_exporter_export (const gchar *infile,
   long len = 0;
   g_autofree gchar *markdown = marker_utils_read_file (infile, &len);
   g_autofree gchar *stylesheet = marker_prefs_get_css_theme ();
-  g_autofree gchar *base_folder = marker_string_filename_get_path (infile);
+  g_autofree gchar *base_folder = g_path_get_dirname (infile);
 
   metadata *meta = marker_markdown_metadata(markdown, len);
   enum scidown_paper_size paper_size = meta->paper_size; 
@@ -284,7 +283,7 @@ marker_exporter_export (const gchar *infile,
     GTK_PAGE_ORIENTATION_LANDSCAPE :
     GTK_PAGE_ORIENTATION_PORTRAIT;
 
-  if (marker_string_ends_with (outfile, ".html")) {
+  if (g_str_has_suffix (outfile, ".html")) {
     marker_markdown_to_html_file_with_css_inline(markdown, len, base_folder,
                                                  (marker_prefs_get_use_mathjs())
                                                    ? MATHJS_NET
@@ -297,14 +296,14 @@ marker_exporter_export (const gchar *infile,
                                                    : MERMAID_OFF),
                                                  stylesheet, outfile);  
   }
-  else if (marker_string_ends_with (outfile, ".pdf")) {
+  else if (g_str_has_suffix (outfile, ".pdf")) {
     /*
     g_autoptr (MarkerPreview) preview = marker_preview_new ();
     marker_preview_render_markdown (preview, markdown, stylesheet, base_folder);
     marker_preview_print_pdf (preview, outfile, paper_size, orientation);
     */
   }
-  else if (marker_string_ends_with (outfile, ".tex")) {
+  else if (g_str_has_suffix (outfile, ".tex")) {
     marker_markdown_to_latex_file(markdown, len, base_folder,
                                   (marker_prefs_get_use_mathjs())
                                     ? MATHJS_NET

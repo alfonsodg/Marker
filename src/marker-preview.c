@@ -29,8 +29,6 @@
 #include "marker-markdown.h"
 #include "marker-prefs.h"
 
-#include "marker-string.h"
-
 #include "marker-preview.h"
 #include "marker.h"
 
@@ -379,7 +377,7 @@ marker_preview_render_markdown(MarkerPreview* preview,
 
   char * base_folder = NULL;
   if (base_uri)
-    base_folder = marker_string_filename_get_path(base_uri);
+    base_folder = g_path_get_dirname(base_uri);
   char* html = marker_markdown_to_html(markdown,
                                        strlen(markdown),
                                        base_folder,

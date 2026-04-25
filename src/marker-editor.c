@@ -25,7 +25,6 @@
 #include <glib/gi18n.h>
 
 #include "marker-prefs.h"
-#include "marker-string.h"
 
 #include "marker-editor.h"
 
@@ -644,7 +643,7 @@ marker_editor_get_subtitle (MarkerEditor *editor)
   if (G_IS_FILE (file))
   {
     g_autofree gchar *path = g_file_get_path (file);
-    subtitle = marker_string_filename_get_path (path);
+    subtitle = g_path_get_dirname (path);
   }
 
   return subtitle;
