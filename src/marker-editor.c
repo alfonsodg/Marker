@@ -487,7 +487,7 @@ marker_editor_set_view_mode (MarkerEditor   *editor,
       GtkWindow *preview_window = GTK_WINDOW (gtk_window_new (GTK_WINDOW_TOPLEVEL));
       g_signal_connect(preview_window, "delete-event", G_CALLBACK (preview_window_closed_cb), preview);
       gtk_container_add (GTK_CONTAINER (preview_window), preview);
-      gtk_window_set_title (preview_window, "Preview");
+      gtk_window_set_title (preview_window, _("Preview"));
       gtk_window_set_default_size (preview_window, 500, 600);
       gtk_widget_show_all (GTK_WIDGET (preview_window));
       gtk_widget_grab_focus (GTK_WIDGET (editor->source_view));

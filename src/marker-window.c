@@ -93,8 +93,8 @@ get_current_iter(MarkerWindow *window,
 static gboolean
 show_unsaved_documents_warning (MarkerWindow *window)
 {
-  const gchar *cancel_text = "Cancel";
-  const gchar *ok_text = "Discard";
+  const gchar *cancel_text = _("Cancel");
+  const gchar *ok_text = _("Discard");
   g_assert (MARKER_IS_WINDOW (window));
 
   MarkerEditor *editor = marker_window_get_active_editor (window);
