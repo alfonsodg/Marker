@@ -299,11 +299,39 @@ marker_exporter_export (const gchar *infile,
                                                  stylesheet, outfile);  
   }
   else if (g_str_has_suffix (outfile, ".pdf")) {
-    /*
-    g_autoptr (MarkerPreview) preview = marker_preview_new ();
-    marker_preview_render_markdown (preview, markdown, stylesheet, base_folder);
+    /* Use offscreen window so WebKit can render without a display window */
+    GtkWidget *offscreen = gtk_offscreen_window_new ();
+    MarkerPreview *preview = marker_preview_new ();
+    gtk_container_add (GTK_CONTAINER (offscreen), GTK_WIDGET (preview));
+    gtk_widget_show_all (offscreen);
+
+    marker_preview_render_markdown (preview,
+                                   markdown,
+                                   stylesheet,
+                                   infile,
+                                   -1);
+
+    /* Wait for WebKit to finish loading and JS to execute (Mermaid) */
+    GMainContext *context = g_main_context_default ();
+    for (int i = 0; i < 200; i++) {
+      g_main_context_iteration (context, FALSE);
+      g_usleep (50000);
+      if (webkit_web_view_get_estimated_load_progress (WEBKIT_WEB_VIEW (preview)) >= 1.0)
+        break;
+    }
+    for (int i = 0; i < 40; i++) {
+      g_main_context_iteration (context, TRUE);
+      g_usleep (50000);
+    }
+
     marker_preview_print_pdf (preview, outfile, paper_size, orientation);
-    */
+
+    for (int i = 0; i < 60; i++) {
+      g_main_context_iteration (context, FALSE);
+      g_usleep (50000);
+    }
+
+    gtk_widget_destroy (offscreen);
   }
   else if (g_str_has_suffix (outfile, ".tex")) {
     marker_markdown_to_latex_file(markdown, len, base_folder,
