@@ -171,7 +171,7 @@ marker_prefs_set_use_mathjs(gboolean state)
 }
 
 gdouble
-makrer_prefs_get_zoom_level()
+marker_prefs_get_zoom_level()
 {
   return  g_settings_get_double(prefs.preview_settings, "preview-zoom-level");
 }
