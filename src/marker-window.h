@@ -51,6 +51,7 @@ void                 marker_window_close_current_document        (MarkerWindow  
 void                 marker_window_toggle_sidebar                (MarkerWindow       *window);
 void                 marker_window_hide_sidebar                  (MarkerWindow       *window);
 void                 marker_window_show_sidebar                  (MarkerWindow       *window);
+void                 marker_window_update_toc                    (MarkerWindow       *window);
 
 void                 marker_window_new_editor                    (MarkerWindow       *window);
 void                 marker_window_new_editor_from_file          (MarkerWindow       *window,
