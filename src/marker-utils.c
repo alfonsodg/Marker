@@ -32,13 +32,25 @@ gchar *
 marker_utils_read_file (const char* infile, long *out_size)
 {
   gchar *contents = NULL;
+  *out_size = 0;
+
+  g_return_val_if_fail (infile != NULL, NULL);
+
   FILE *file = fopen (infile, "r");
+  if (!file) {
+    g_warning ("marker_utils_read_file: cannot open '%s'", infile);
+    return NULL;
+  }
+
   fseek (file, 0, SEEK_END);
   long size = ftell (file);
-  *out_size = size;
   rewind (file);
-  contents = g_malloc (size);
-  fread (contents, size, 1, file);
+
+  contents = g_malloc (size + 1);
+  size_t nread = fread (contents, 1, size, file);
+  contents[nread] = '\0';
+  *out_size = (long) nread;
+
   fclose (file);
   return contents;
 }
