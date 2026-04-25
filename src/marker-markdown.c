@@ -68,9 +68,9 @@ char* html_header(MarkerMathJSMode    mathjs_mode,
   case MATHJS_NET:
       if (backend == KATEX)
       {
-        mathjs_css = g_strdup("<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0-alpha2/katex.min.css\" crossorigin=\"anonymous\">");
-        mathjs_script = g_strdup("<script src=\"https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0-alpha2/katex.min.js\" crossorigin=\"anonymous\"></script>");
-        mathjs_auto = g_strdup("<script src=\"https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0-alpha2/contrib/auto-render.min.js\" crossorigin=\"anonymous\"></script>");
+        mathjs_css = g_strdup("<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css\">");
+        mathjs_script = g_strdup("<script src=\"https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js\"></script>");
+        mathjs_auto = g_strdup("<script src=\"https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js\"></script>");
       } else
       {
         mathjs_css = g_strdup(" ");
@@ -99,9 +99,9 @@ char* html_header(MarkerMathJSMode    mathjs_mode,
       highlight_script = g_strdup(" ");
       break;
     case HIGHLIGHT_NET:
-      highlight_css = g_strdup_printf("<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/%s.min.css\">",
+      highlight_css = g_strdup_printf("<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/styles/%s.min.css\">",
                                       local_highlight_css);
-      highlight_script = g_strdup("<script src=\"https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js\"></script>");
+      highlight_script = g_strdup("<script src=\"https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/highlight.min.js\"></script>");
       break;
     case HIGHLIGHT_LOCAL:
       highlight_css = g_strdup_printf("<link rel=\"stylesheet\" href=\"file://%shighlight/styles/%s.css\">", SCRIPTS_DIR, local_highlight_css);

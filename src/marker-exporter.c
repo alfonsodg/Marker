@@ -273,6 +273,14 @@ marker_exporter_pdf_timeout_cb (gpointer data)
   return G_SOURCE_REMOVE;
 }
 
+static gboolean force_landscape = FALSE;
+
+void
+marker_exporter_set_landscape (gboolean landscape)
+{
+  force_landscape = landscape;
+}
+
 void
 marker_exporter_export (const gchar *infile,
                         const gchar *outfile)
@@ -291,6 +299,10 @@ marker_exporter_export (const gchar *infile,
   GtkPageOrientation orientation = meta->doc_class == CLASS_BEAMER ?
     GTK_PAGE_ORIENTATION_LANDSCAPE :
     GTK_PAGE_ORIENTATION_PORTRAIT;
+
+  /* CLI --landscape flag overrides document metadata (#30) */
+  if (force_landscape)
+    orientation = GTK_PAGE_ORIENTATION_LANDSCAPE;
 
   if (g_str_has_suffix (outfile, ".html")) {
     marker_markdown_to_html_file_with_css_inline(markdown, len, base_folder,
