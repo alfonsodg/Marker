@@ -188,7 +188,7 @@ img {
   overflow: auto;
   page-break-inside: avoid;
   margin: 30px 0;
-  text-align: center;
+  text-align: left;
 }
 
 .mermaid svg {
