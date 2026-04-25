@@ -253,7 +253,7 @@ scroll_js_finished_cb (GObject      *object,
 
   js_result = webkit_web_view_run_javascript_finish (WEBKIT_WEB_VIEW (object), result, &error);
   if (error != NULL) {
-    g_print ("Error running scroll script: %s", error->message);
+    g_warning ("Error running scroll script: %s", error->message);
     g_error_free (error);
     return;
   } 

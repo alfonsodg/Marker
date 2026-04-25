@@ -842,7 +842,7 @@ marker_window_init (MarkerWindow *window)
   marker_window_hide_sidebar (window);
   guint width = marker_prefs_get_window_width();
   guint height = marker_prefs_get_window_height();
-  g_print ("window size loaded from the preferences: %d x %d\n", width, height);
+  g_debug ("window size loaded from the preferences: %d x %d", width, height);
   if (width == 0)
   {
     marker_prefs_set_window_width(900);
@@ -856,7 +856,7 @@ marker_window_init (MarkerWindow *window)
 
   gint pos_x = 0, pos_y = 0;
   marker_prefs_get_window_position( &pos_x, &pos_y);
-  g_print ("window position loaded from the preferences: %d, %d\n", pos_x, pos_y);
+  g_debug ("window position loaded from the preferences: %d, %d", pos_x, pos_y);
   // require restored window position to be positive
   if (pos_y >= 0 && pos_x >= 0)
   {
@@ -1186,17 +1186,17 @@ marker_window_try_close (MarkerWindow *window)
   // Save window size and position in the preferences
   gint width, height;
   gtk_window_get_size (GTK_WINDOW (window), &width, &height);
-  g_print ("saved window size: %d x %d\n", width, height);
+  g_debug ("saved window size: %d x %d", width, height);
   marker_prefs_set_window_width (width);
   marker_prefs_set_window_height (height);
 
   gint pos_x = 0, pos_y = 0;
   gtk_window_get_position(GTK_WINDOW (window), &pos_x, &pos_y);
-  g_print ("saved window position: %d, %d\n", pos_x, pos_y);
+  g_debug ("saved window position: %d, %d", pos_x, pos_y);
   marker_prefs_set_window_position (pos_x, pos_y);
 
   guint editor_width = marker_editor_get_pane_width (window->active_editor);
-  g_print ("saved editor pane width: %d\n", editor_width);
+  g_debug ("saved editor pane width: %d", editor_width);
   marker_prefs_set_editor_pane_width (editor_width);
 
   if (rows > 0)

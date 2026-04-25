@@ -79,7 +79,7 @@ page_created_cb (WebKitWebExtension *extension,
 G_MODULE_EXPORT void
 webkit_web_extension_initialize (WebKitWebExtension *extension)
 {
-  g_print("scroll 2.0 extension initialized\n");
+  g_debug("scroll 2.0 extension initialized");
   g_signal_connect (extension, "page-created",
                     G_CALLBACK (page_created_cb),
                     NULL);
