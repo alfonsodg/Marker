@@ -235,7 +235,7 @@ marker_source_view_set_language(MarkerSourceView* source_view,
 
     gtk_source_buffer_set_language(buffer, language);
 
-    g_object_unref(manager);
+    /* Do NOT unref manager — it is a singleton owned by GtkSourceView (#7) */
   }
 }
 
