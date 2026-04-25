@@ -59,6 +59,8 @@ struct _MarkerWindow
   GtkStack             *editors_stack;
   GtkTreeView          *documents_tree_view;
   GtkTreeStore         *documents_tree_store;
+  GtkTreeView          *toc_tree_view;
+  GtkListStore         *toc_store;
   GtkPaned             *main_paned;
   GtkWidget            *paned1;
   GtkWidget            *paned2;
@@ -348,6 +350,7 @@ title_changed_cb (MarkerEditor *editor,
                        TITLE_COLUMN,
                        markup_title, -1);
   }
+  marker_window_update_toc (window);
 }
 
 static void
@@ -553,6 +556,68 @@ button_pressed_cb (GtkWidget *view,
     return FALSE;
   }
   return TRUE;
+}
+
+/* TOC: update outline from editor headings (#24) */
+void
+marker_window_update_toc (MarkerWindow *window)
+{
+  if (!window->toc_store || !window->active_editor)
+    return;
+
+  gtk_list_store_clear (window->toc_store);
+
+  MarkerSourceView *sv = marker_editor_get_source_view (window->active_editor);
+  GtkTextBuffer *buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (sv));
+  GtkTextIter iter;
+  gtk_text_buffer_get_start_iter (buffer, &iter);
+
+  while (!gtk_text_iter_is_end (&iter)) {
+    GtkTextIter line_end = iter;
+    gtk_text_iter_forward_to_line_end (&line_end);
+    g_autofree gchar *line = gtk_text_buffer_get_text (buffer, &iter, &line_end, FALSE);
+
+    if (line && line[0] == '#') {
+      int level = 0;
+      while (line[level] == '#') level++;
+      if (level <= 6 && line[level] == ' ') {
+        gchar *title = g_strdup (line + level + 1);
+        /* Indent based on level */
+        g_autofree gchar *display = g_strdup_printf ("%*s%s", (level - 1) * 2, "", title);
+        GtkTreeIter tree_iter;
+        gtk_list_store_append (window->toc_store, &tree_iter);
+        gtk_list_store_set (window->toc_store, &tree_iter,
+                            0, display,
+                            1, gtk_text_iter_get_line (&iter),
+                            -1);
+        g_free (title);
+      }
+    }
+    if (!gtk_text_iter_forward_line (&iter))
+      break;
+  }
+}
+
+static void
+toc_row_activated_cb (GtkTreeView       *tree_view,
+                      GtkTreePath       *path,
+                      GtkTreeViewColumn *column,
+                      gpointer           user_data)
+{
+  MarkerWindow *window = MARKER_WINDOW (user_data);
+  GtkTreeIter iter;
+  if (!gtk_tree_model_get_iter (GTK_TREE_MODEL (window->toc_store), &iter, path))
+    return;
+
+  gint line_num;
+  gtk_tree_model_get (GTK_TREE_MODEL (window->toc_store), &iter, 1, &line_num, -1);
+
+  MarkerSourceView *sv = marker_editor_get_source_view (window->active_editor);
+  GtkTextBuffer *buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (sv));
+  GtkTextIter text_iter;
+  gtk_text_buffer_get_iter_at_line (buffer, &text_iter, line_num);
+  gtk_text_buffer_place_cursor (buffer, &text_iter);
+  gtk_text_view_scroll_to_iter (GTK_TEXT_VIEW (sv), &text_iter, 0.0, TRUE, 0.0, 0.2);
 }
 
 static void
@@ -773,6 +838,17 @@ marker_window_init (MarkerWindow *window)
   window->documents_tree_store = documents_store;
   window->documents_tree_view = documents_tree_view;
 
+  /* TOC sidebar setup (#24) */
+  GtkTreeView *toc_tv = GTK_TREE_VIEW (gtk_builder_get_object (builder, "toc_tree_view"));
+  GtkListStore *toc_store = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_INT);
+  gtk_tree_view_set_model (toc_tv, GTK_TREE_MODEL (toc_store));
+  GtkCellRenderer *toc_renderer = gtk_cell_renderer_text_new ();
+  GtkTreeViewColumn *toc_col = gtk_tree_view_column_new_with_attributes (
+    "Outline", toc_renderer, "text", 0, NULL);
+  gtk_tree_view_append_column (toc_tv, toc_col);
+  window->toc_tree_view = toc_tv;
+  window->toc_store = toc_store;
+  g_signal_connect (toc_tv, "row-activated", G_CALLBACK (toc_row_activated_cb), window);
 
   GtkTreeSelection *select;
   select = gtk_tree_view_get_selection (documents_tree_view);
