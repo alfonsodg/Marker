@@ -34,4 +34,5 @@ typedef enum
 void                 marker_exporter_show_export_dialog          (MarkerWindow       *window);
 void                 marker_exporter_export                      (const gchar        *infile,
                                                                   const gchar        *outfile);
+void                 marker_exporter_set_landscape               (gboolean            landscape);
 #endif

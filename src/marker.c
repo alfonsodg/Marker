@@ -43,6 +43,9 @@ static gboolean editor_mode_arg = FALSE;
 static gboolean preview_mode_arg = FALSE;
 static gboolean dual_pane_mode_arg = FALSE;
 static gboolean dual_window_mode_arg = FALSE;
+static gboolean batch_mode_arg = FALSE;
+static gboolean landscape_arg = FALSE;
+static gboolean watch_arg = FALSE;
 static gchar *outfile_arg = NULL;
 
 static const GOptionEntry CLI_OPTIONS[] =
@@ -51,7 +54,10 @@ static const GOptionEntry CLI_OPTIONS[] =
   { "preview", 'p', 0, G_OPTION_ARG_NONE, &preview_mode_arg, "Open in preview-only mode", NULL },
   { "dual-pane", 'd', 0, G_OPTION_ARG_NONE, &dual_pane_mode_arg, "Open in dual-pane mode", NULL },
   { "dual-window", 'w', 0, G_OPTION_ARG_NONE, &dual_window_mode_arg, "Open in dual-window mode", NULL },
-  { "output", 'o', 0, G_OPTION_ARG_STRING, &outfile_arg, "Export the given markdown document as the given output file", NULL },
+  { "output", 'o', 0, G_OPTION_ARG_STRING, &outfile_arg, "Export markdown to the given output file", NULL },
+  { "batch", 'b', 0, G_OPTION_ARG_NONE, &batch_mode_arg, "Batch export all .md files in directory to PDF", NULL },
+  { "landscape", 'l', 0, G_OPTION_ARG_NONE, &landscape_arg, "Use landscape orientation for PDF export", NULL },
+  { "watch", 'W', 0, G_OPTION_ARG_NONE, &watch_arg, "Watch file for changes and re-export automatically", NULL },
   { NULL }
 };
 
@@ -105,6 +111,23 @@ activate(GtkApplication* app)
 }
 
 static void
+marker_watch_changed_cb (GFileMonitor      *monitor,
+                         GFile             *file,
+                         GFile             *other_file,
+                         GFileMonitorEvent  event_type,
+                         gpointer           user_data)
+{
+  if (event_type != G_FILE_MONITOR_EVENT_CHANGES_DONE_HINT)
+    return;
+  gchar **paths = (gchar **) user_data;
+  GDateTime *now = g_date_time_new_now_local ();
+  g_autofree gchar *ts = g_date_time_format (now, "%H:%M:%S");
+  g_date_time_unref (now);
+  g_print ("[%s] Re-exporting %s\n", ts, paths[0]);
+  marker_exporter_export (paths[0], paths[1]);
+}
+
+static void
 marker_open(GtkApplication* app,
             GFile**         files,
             gint            num_files,
@@ -113,11 +136,58 @@ marker_open(GtkApplication* app,
   g_application_hold (G_APPLICATION (app));
   marker_init(app);
 
+  /* Apply CLI flags */
+  marker_exporter_set_landscape (landscape_arg);
+
+  /* Batch export: convert all .md files in directory to PDF (#18) */
+  if (batch_mode_arg) {
+    g_autofree gchar *dir_path = g_file_get_path (files[0]);
+    GDir *dir = g_dir_open (dir_path, 0, NULL);
+    if (!dir) {
+      g_printerr ("marker: cannot open directory: %s\n", dir_path);
+      exit (1);
+    }
+    const gchar *name;
+    g_autofree gchar *out_dir = outfile_arg ? g_strdup (outfile_arg) : g_strdup (dir_path);
+    g_mkdir_with_parents (out_dir, 0755);
+
+    while ((name = g_dir_read_name (dir)) != NULL) {
+      if (!g_str_has_suffix (name, ".md"))
+        continue;
+      g_autofree gchar *infile = g_build_filename (dir_path, name, NULL);
+      g_autofree gchar *basename = g_strdup (name);
+      basename[strlen(basename) - 3] = '\0';
+      g_autofree gchar *outfile = g_build_filename (out_dir, g_strdup_printf ("%s.pdf", basename), NULL);
+      g_print ("Exporting %s → %s\n", name, outfile);
+      marker_exporter_export (infile, outfile);
+    }
+    g_dir_close (dir);
+    exit (0);
+  }
+
+  /* Single file export */
   if (outfile_arg != NULL) {
     g_autoptr (GFile) outfile = g_file_new_for_commandline_arg (outfile_arg);
     g_autofree gchar *outfile_path = g_file_get_path (outfile);
     g_autofree gchar *infile_path = g_file_get_path (files[0]);
-    marker_exporter_export (infile_path, outfile_path);
+
+    /* Watch mode: re-export on file changes (#19) */
+    if (watch_arg) {
+      g_print ("Watching %s → %s (Ctrl+C to stop)\n", infile_path, outfile_path);
+      marker_exporter_export (infile_path, outfile_path);
+
+      GFileMonitor *monitor = g_file_monitor_file (files[0], G_FILE_MONITOR_NONE, NULL, NULL);
+      GMainLoop *loop = g_main_loop_new (NULL, FALSE);
+
+      /* Store paths for the callback */
+      gchar *watch_data[] = { infile_path, outfile_path };
+      g_signal_connect (monitor, "changed",
+        G_CALLBACK (marker_watch_changed_cb), watch_data);
+      g_main_loop_run (loop);
+      g_main_loop_unref (loop);
+    } else {
+      marker_exporter_export (infile_path, outfile_path);
+    }
     exit (0);
   }
  
