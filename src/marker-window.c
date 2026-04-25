@@ -509,10 +509,8 @@ close_button_clicked(GtkTreeView *view, GtkTreeViewColumn *col, guint x, GtkCell
     gint min_width=0, nat_width=0;
     gtk_cell_renderer_get_preferred_width(checkcell, GTK_WIDGET(view), &min_width, &nat_width);
 
-    GValue value = G_VALUE_INIT;
-    g_value_init(&value, G_TYPE_INT);
-    g_object_get_property(G_OBJECT(col), "width", &value);
-    colw = g_value_get_int(&value);
+    /* Use g_object_get instead of GValue to avoid leak (#11) */
+    g_object_get(col, "width", &colw, NULL);
 
 
     if (x >= colw-nat_width && x < colw)
