@@ -266,6 +266,13 @@ marker_exporter_show_export_dialog(MarkerWindow* window)
   gtk_widget_destroy(GTK_WIDGET(dialog));
 }
 
+static gboolean
+marker_exporter_pdf_timeout_cb (gpointer data)
+{
+  g_main_loop_quit ((GMainLoop *) data);
+  return G_SOURCE_REMOVE;
+}
+
 void
 marker_exporter_export (const gchar *infile,
                         const gchar *outfile)
@@ -299,37 +306,26 @@ marker_exporter_export (const gchar *infile,
                                                  stylesheet, outfile);  
   }
   else if (g_str_has_suffix (outfile, ".pdf")) {
-    /* Use offscreen window so WebKit can render without a display window */
     GtkWidget *offscreen = gtk_offscreen_window_new ();
     MarkerPreview *preview = marker_preview_new ();
     gtk_container_add (GTK_CONTAINER (offscreen), GTK_WIDGET (preview));
     gtk_widget_show_all (offscreen);
 
-    marker_preview_render_markdown (preview,
-                                   markdown,
-                                   stylesheet,
-                                   infile,
-                                   -1);
+    marker_preview_render_markdown (preview, markdown, stylesheet, infile, -1);
 
-    /* Wait for WebKit to finish loading and JS to execute (Mermaid) */
-    GMainContext *context = g_main_context_default ();
-    for (int i = 0; i < 200; i++) {
-      g_main_context_iteration (context, FALSE);
-      g_usleep (50000);
-      if (webkit_web_view_get_estimated_load_progress (WEBKIT_WEB_VIEW (preview)) >= 1.0)
-        break;
-    }
-    for (int i = 0; i < 40; i++) {
-      g_main_context_iteration (context, TRUE);
-      g_usleep (50000);
-    }
+    /* Run main loop with timeout to let WebKit load HTML + Mermaid JS render */
+    GMainLoop *loop = g_main_loop_new (NULL, FALSE);
+    g_timeout_add (8000, marker_exporter_pdf_timeout_cb, loop);
+    g_main_loop_run (loop);
+    g_main_loop_unref (loop);
 
     marker_preview_print_pdf (preview, outfile, paper_size, orientation);
 
-    for (int i = 0; i < 60; i++) {
-      g_main_context_iteration (context, FALSE);
-      g_usleep (50000);
-    }
+    /* Let print operation complete */
+    loop = g_main_loop_new (NULL, FALSE);
+    g_timeout_add (3000, marker_exporter_pdf_timeout_cb, loop);
+    g_main_loop_run (loop);
+    g_main_loop_unref (loop);
 
     gtk_widget_destroy (offscreen);
   }
