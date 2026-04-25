@@ -899,10 +899,8 @@ marker_prefs_show_window()
   gtk_spin_button_set_value(spin_button, marker_prefs_get_tab_width());
 
   GtkWindow* window = GTK_WINDOW(gtk_builder_get_object(builder, "prefs_win"));
-	gtk_widget_show_all(GTK_WIDGET(window));
-  gtk_window_present(window);
 
-
+  /* Connect signals BEFORE showing the window to avoid race condition (#10) */
   gtk_builder_add_callback_symbol(builder,
                                   "syntax_chosen",
                                   G_CALLBACK(syntax_chosen));
@@ -976,6 +974,10 @@ marker_prefs_show_window()
                                   "enable_charter_toggled",
                                   G_CALLBACK(enable_charter_toggled));
   gtk_builder_connect_signals(builder, NULL);
+
+  /* Show window AFTER signals are connected (#10) */
+  gtk_widget_show_all(GTK_WIDGET(window));
+  gtk_window_present(window);
 
   g_object_unref(builder);
 }
