@@ -389,12 +389,13 @@ marker_preview_render_markdown(MarkerPreview* preview,
 
   WebKitWebView* web_view = WEBKIT_WEB_VIEW(preview);
 
-  /* Re-enable JS only when MathJax, Highlight, or Mermaid need it (#2) */
+  /* Re-enable JS and file access when MathJax, Highlight, or Mermaid need it (#2) */
   gboolean needs_js = (katex_mode != MATHJS_OFF ||
                        highlight_mode != HIGHLIGHT_OFF ||
                        mermaid_mode != MERMAID_OFF);
   WebKitSettings *settings = webkit_web_view_get_settings(web_view);
   webkit_settings_set_enable_javascript(settings, needs_js);
+  webkit_settings_set_allow_file_access_from_file_urls(settings, needs_js);
 
   g_signal_connect(web_view,
                    "decide-policy",
