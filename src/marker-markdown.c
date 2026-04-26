@@ -184,32 +184,10 @@ html_footer(MarkerMathJSMode     mathjs_mode,
       break;
   }
 
-  /* TOC generation script — inserts table of contents at top of document (#29) */
-  char *toc_script = g_strdup(
-    "<script>"
-    "document.addEventListener('DOMContentLoaded',function(){"
-    "var hs=document.querySelectorAll('h1,h2,h3');"
-    "if(hs.length<3)return;"
-    "var toc=document.createElement('div');"
-    "toc.innerHTML='<h2 style=\"page-break-before:avoid\">Table of Contents</h2>';"
-    "var ul=document.createElement('ul');"
-    "ul.style.cssText='list-style:none;padding:0;';"
-    "hs.forEach(function(h,i){"
-    "var li=document.createElement('li');"
-    "var indent=h.tagName==='H1'?0:h.tagName==='H2'?15:30;"
-    "li.style.cssText='margin-left:'+indent+'px;margin-bottom:4px;';"
-    "li.textContent=h.textContent;"
-    "ul.appendChild(li);});"
-    "toc.appendChild(ul);"
-    "toc.style.cssText='page-break-after:always;';"
-    "document.body.insertBefore(toc,document.body.firstChild);"
-    "});</script>");
-
-  char* buffer = g_strdup_printf("%s\n%s\n%s\n%s\n", mathjs_render, highlight_render, mermaid_render, toc_script);
+  char* buffer = g_strdup_printf("%s\n%s\n%s\n", mathjs_render, highlight_render, mermaid_render);
   g_free(highlight_render);
   g_free(mathjs_render);
   g_free(mermaid_render);
-  g_free(toc_script);
   return buffer;
 }
 
