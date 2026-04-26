@@ -40,6 +40,7 @@ struct _MarkerEditor
   GtkPaned             *paned;
   GtkBox               *vbox;
   GtkSearchEntry       *search_entry;
+  GtkEntry             *replace_entry;
   GtkSearchBar         *search_bar;
   MarkerPreview        *preview;
   MarkerSourceView     *source_view;
@@ -241,6 +242,27 @@ search_previous     (GtkEntry         *entry,
 }
 
 static void
+replace_clicked_cb (GtkButton *button, MarkerEditor *editor)
+{
+  GtkSourceSearchContext *ctx = marker_source_get_search_context (editor->source_view);
+  const gchar *replacement = gtk_entry_get_text (editor->replace_entry);
+  GtkTextBuffer *buffer = GTK_TEXT_BUFFER (gtk_source_search_context_get_buffer (ctx));
+  GtkTextIter start, end;
+  if (gtk_text_buffer_get_selection_bounds (buffer, &start, &end)) {
+    gtk_source_search_context_replace2 (ctx, &start, &end, replacement, -1, NULL);
+    search_next (GTK_ENTRY (editor->search_entry), editor);
+  }
+}
+
+static void
+replace_all_clicked_cb (GtkButton *button, MarkerEditor *editor)
+{
+  GtkSourceSearchContext *ctx = marker_source_get_search_context (editor->source_view);
+  const gchar *replacement = gtk_entry_get_text (editor->replace_entry);
+  gtk_source_search_context_replace_all (ctx, replacement, -1, NULL);
+}
+
+static void
 editor_scroll_changed_cb (GtkAdjustment *adj,
                           gpointer       user_data)
 {
@@ -275,20 +297,29 @@ marker_editor_init (MarkerEditor *editor)
   editor->paned = GTK_PANED (gtk_paned_new (GTK_ORIENTATION_HORIZONTAL));
   editor->vbox = GTK_BOX(gtk_box_new(GTK_ORIENTATION_VERTICAL, 0));
 
-  /** SEARCH TOOL BAR **/
+  /** SEARCH AND REPLACE TOOL BAR (#38) **/
   editor->search_entry = GTK_SEARCH_ENTRY(gtk_search_entry_new());
+  editor->replace_entry = GTK_ENTRY(gtk_entry_new());
+  gtk_entry_set_placeholder_text(editor->replace_entry, "Replace...");
+
+  GtkBox *search_box = GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4));
+  gtk_box_pack_start(search_box, GTK_WIDGET(editor->search_entry), TRUE, TRUE, 0);
+  gtk_box_pack_start(search_box, GTK_WIDGET(editor->replace_entry), TRUE, TRUE, 0);
+  GtkButton *replace_btn = GTK_BUTTON(gtk_button_new_with_label("Replace"));
+  GtkButton *replace_all_btn = GTK_BUTTON(gtk_button_new_with_label("All"));
+  gtk_box_pack_start(search_box, GTK_WIDGET(replace_btn), FALSE, FALSE, 0);
+  gtk_box_pack_start(search_box, GTK_WIDGET(replace_all_btn), FALSE, FALSE, 0);
 
   GtkSearchBar * sbar = GTK_SEARCH_BAR(gtk_search_bar_new());
   editor->search_bar = sbar;
-
-  gtk_container_add(GTK_CONTAINER(sbar), GTK_WIDGET(editor->search_entry));
-
+  gtk_container_add(GTK_CONTAINER(sbar), GTK_WIDGET(search_box));
   gtk_box_pack_start(editor->vbox, GTK_WIDGET(sbar), FALSE, TRUE, 0);
-
   gtk_widget_show_all(GTK_WIDGET(sbar));
-
   gtk_search_bar_set_search_mode(sbar, FALSE);
   gtk_search_bar_set_show_close_button(sbar, TRUE);
+
+  g_signal_connect(replace_btn, "clicked", G_CALLBACK(replace_clicked_cb), editor);
+  g_signal_connect(replace_all_btn, "clicked", G_CALLBACK(replace_all_clicked_cb), editor);
 
   g_signal_connect(editor->search_entry,
                    "search-changed",
