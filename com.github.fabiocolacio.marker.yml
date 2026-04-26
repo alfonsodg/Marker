@@ -1,0 +1,40 @@
+app-id: com.github.fabiocolacio.marker
+runtime: org.gnome.Platform
+runtime-version: '46'
+sdk: org.gnome.Sdk
+command: marker
+finish-args:
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --filesystem=home
+modules:
+  - name: gtkspell3
+    buildsystem: autotools
+    sources:
+      - type: archive
+        url: https://sourceforge.net/projects/gtkspell/files/3.0.10/gtkspell3-3.0.10.tar.xz
+        sha256: b040f63836b347eb344f5571e2a7c5c28da0a3e7a3e97c8df1740d2806a3e7f0
+
+  - name: gtksourceview3
+    buildsystem: meson
+    sources:
+      - type: archive
+        url: https://download.gnome.org/sources/gtksourceview/3.24/gtksourceview-3.24.11.tar.xz
+        sha256: 691b074a37b2a307f7f48edc5b8c7afa76e709e28c4d0e3f6011e5d1e8e14e8e
+
+  - name: marker
+    buildsystem: meson
+    sources:
+      - type: git
+        url: https://github.com/alfonsodg/Marker.git
+        branch: master
+      - type: git
+        url: https://github.com/Mandarancio/scidown.git
+        dest: src/scidown
+      - type: git
+        url: https://github.com/Mandarancio/charter.git
+        dest: src/scidown/src/charter
+      - type: git
+        url: https://github.com/codeplea/tinyexpr.git
+        dest: src/scidown/src/charter/src/tinyexpr
