@@ -181,50 +181,66 @@ img {
   unicode-bidi: plaintext;
 }
 
-/* PDF page numbers and footer (#28) */
-@page {
-  margin: 15mm 10mm 20mm 10mm;
-  @bottom-center {
-    content: counter(page);
-    font-size: 10pt;
-    color: #666;
-  }
-}
-
-/* Mermaid diagrams: each title + diagram = exactly one A4 page */
-h3 {
-  page-break-before: always;
-  page-break-after: avoid;
-  margin-top: 0;
-  margin-bottom: 2mm;
-}
-
+/* === SCREEN: preview visual — diagrams fit viewport === */
 .mermaid {
-  width: 190mm;
-  height: 245mm;
-  overflow: hidden;
-  page-break-before: avoid;
-  page-break-inside: avoid;
-  margin: 0;
+  width: 100%;
+  overflow: visible;
+  margin: 8px 0;
   padding: 0;
 }
 
 .mermaid svg {
-  width: 190mm !important;
-  height: 245mm !important;
+  max-width: 100% !important;
+  height: auto !important;
 }
 
+h3 {
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+
+/* === PRINT: PDF export — one diagram per A4 page === */
+@media print {
+  @page {
+    margin: 10mm;
+    @bottom-center {
+      content: counter(page);
+      font-size: 10pt;
+      color: #666;
+    }
+  }
+
+  h3 {
+    page-break-before: always;
+    page-break-after: avoid;
+    margin-top: 0;
+    margin-bottom: 2mm;
+  }
+
+  .mermaid {
+    width: 190mm;
+    max-height: 250mm;
+    overflow: hidden;
+    page-break-before: avoid;
+    page-break-inside: avoid;
+  }
+
+  .mermaid svg {
+    width: 190mm !important;
+    max-height: 250mm !important;
+  }
+}
+
+/* === BOTH: text and line styling === */
 .mermaid svg text {
-  font-size: 16px !important;
-}
-
-.mermaid svg .edgeLabel {
   font-size: 14px !important;
 }
 
-.mermaid svg .node rect,
-.mermaid svg .node circle,
-.mermaid svg .node polygon {
+.mermaid svg .edgeLabel {
+  font-size: 12px !important;
+}
+
+.mermaid svg .edgePath path {
   stroke-width: 2px !important;
 }
 
