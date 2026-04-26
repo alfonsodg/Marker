@@ -50,6 +50,7 @@ struct _MarkerEditor
   gboolean              search_active;
   gboolean              needs_refresh;
   guint                 timer_id;
+  gdouble               zoom_level;
 
   GtkTextIter          *text_iter;
 };
@@ -242,6 +243,12 @@ search_previous     (GtkEntry         *entry,
 }
 
 static void
+editor_zoom_changed_cb (MarkerEditor *editor)
+{
+  editor->zoom_level = webkit_web_view_get_zoom_level (WEBKIT_WEB_VIEW (editor->preview));
+}
+
+static void
 replace_clicked_cb (GtkButton *button, MarkerEditor *editor)
 {
   GtkSourceSearchContext *ctx = marker_source_get_search_context (editor->source_view);
@@ -348,6 +355,8 @@ marker_editor_init (MarkerEditor *editor)
   gtk_box_pack_start (GTK_BOX (editor), GTK_WIDGET (editor->paned), TRUE, TRUE, 0);
 
   editor->preview = marker_preview_new ();
+  g_signal_connect_swapped (editor->preview, "zoom-changed",
+    G_CALLBACK (editor_zoom_changed_cb), editor);
   gtk_widget_show (GTK_WIDGET (editor->preview));
 
   editor->source_view = marker_source_view_new ();
@@ -369,6 +378,7 @@ marker_editor_init (MarkerEditor *editor)
 
   editor->view_mode = marker_prefs_get_default_view_mode ();
   editor->needs_refresh = FALSE;
+  editor->zoom_level = marker_prefs_get_zoom_level ();
 
   marker_editor_set_view_mode (editor, editor->view_mode);
   gtk_widget_show (GTK_WIDGET (editor));
@@ -468,6 +478,9 @@ marker_editor_refresh_preview (MarkerEditor *editor)
   g_autofree gchar *uri = (G_IS_FILE(editor->file)) ? g_file_get_path(editor->file) : NULL;
 
   marker_preview_render_markdown(editor->preview, markdown, css_theme, uri, cursor);
+
+  /* Restore per-editor zoom level (#43) */
+  webkit_web_view_set_zoom_level (WEBKIT_WEB_VIEW (editor->preview), editor->zoom_level);
 }
 
 MarkerViewMode
