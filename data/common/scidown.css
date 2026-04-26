@@ -181,18 +181,22 @@ img {
   unicode-bidi: plaintext;
 }
 
-/* === SCREEN: all diagrams same width, natural height === */
+/* === SCREEN: uniform diagram size === */
 .mermaid {
   width: 100%;
+  min-height: 500px;
   margin: 8px 0;
   padding: 10px;
   border: 1px solid #e0e0e0;
   background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mermaid svg {
   width: 100% !important;
-  height: auto !important;
+  min-height: 480px !important;
 }
 
 h3 {
@@ -200,7 +204,13 @@ h3 {
   margin-bottom: 4px;
 }
 
-/* === PRINT: PDF export — one diagram per A4 page === */
+/* Links: preserve styling for PDF */
+a {
+  color: #1a73e8;
+  text-decoration: underline;
+}
+
+/* === PRINT: PDF export === */
 @media print {
   @page {
     margin: 10mm;
@@ -209,6 +219,18 @@ h3 {
       font-size: 10pt;
       color: #666;
     }
+  }
+
+  /* Show link URLs in PDF */
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    color: #666;
+    word-break: break-all;
+  }
+
+  a[href^="#"]:after {
+    content: "";
   }
 
   h3 {
