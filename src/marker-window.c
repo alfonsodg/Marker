@@ -202,7 +202,35 @@ action_monospace (GSimpleAction *action,
 {
     MarkerEditor *editor = marker_window_get_active_editor (MARKER_WINDOW (window));
     MarkerSourceView *source_view = marker_editor_get_source_view (editor);
-    marker_source_view_surround_selection_with (source_view, "``");
+    marker_source_view_surround_selection_with (source_view, "`");
+}
+
+static void
+action_table (GSimpleAction *action,
+              GVariant      *parameter,
+              gpointer       window)
+{
+    MarkerEditor *editor = marker_window_get_active_editor (MARKER_WINDOW (window));
+    MarkerSourceView *source_view = marker_editor_get_source_view (editor);
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (source_view));
+    GtkTextIter iter;
+    gtk_text_buffer_get_iter_at_mark (buffer, &iter, gtk_text_buffer_get_insert (buffer));
+    const gchar *tpl = "\n| Column 1 | Column 2 | Column 3 |\n|----------|----------|----------|\n| cell     | cell     | cell     |\n";
+    gtk_text_buffer_insert (buffer, &iter, tpl, -1);
+}
+
+static void
+action_mermaid (GSimpleAction *action,
+                GVariant      *parameter,
+                gpointer       window)
+{
+    MarkerEditor *editor = marker_window_get_active_editor (MARKER_WINDOW (window));
+    MarkerSourceView *source_view = marker_editor_get_source_view (editor);
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (source_view));
+    GtkTextIter iter;
+    gtk_text_buffer_get_iter_at_mark (buffer, &iter, gtk_text_buffer_get_insert (buffer));
+    const gchar *tpl = "\n```mermaid\ngraph TD\n    A --> B\n```\n";
+    gtk_text_buffer_insert (buffer, &iter, tpl, -1);
 }
 
 static void
@@ -667,6 +695,20 @@ marker_window_init (MarkerWindow *window)
     g_signal_connect (G_SIMPLE_ACTION (action), "activate", G_CALLBACK (action_monospace), window);
     const gchar *monospace_accels[] = { "<Ctrl>m", NULL };
     gtk_application_set_accels_for_action (app, "win.monospace", monospace_accels);
+    g_action_map_add_action (G_ACTION_MAP (window), action);
+
+    /* Insert table template Ctrl+T (#39) */
+    action = G_ACTION (g_simple_action_new ("table", NULL));
+    g_signal_connect (G_SIMPLE_ACTION (action), "activate", G_CALLBACK (action_table), window);
+    const gchar *table_accels[] = { "<Ctrl>t", NULL };
+    gtk_application_set_accels_for_action (app, "win.table", table_accels);
+    g_action_map_add_action (G_ACTION_MAP (window), action);
+
+    /* Insert mermaid template Ctrl+Shift+M (#40) */
+    action = G_ACTION (g_simple_action_new ("mermaid", NULL));
+    g_signal_connect (G_SIMPLE_ACTION (action), "activate", G_CALLBACK (action_mermaid), window);
+    const gchar *mermaid_accels[] = { "<Shift><Ctrl>m", NULL };
+    gtk_application_set_accels_for_action (app, "win.mermaid", mermaid_accels);
     g_action_map_add_action (G_ACTION_MAP (window), action);
 
     action = G_ACTION (g_simple_action_new ("new", NULL));
