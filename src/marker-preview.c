@@ -103,6 +103,21 @@ decide_policy_cb (WebKitWebView *web_view,
 }
 
 
+static void
+copy_diagram_cb (GtkAction *action, gpointer user_data)
+{
+  WebKitWebView *web_view = WEBKIT_WEB_VIEW (user_data);
+  /* JS: find the nearest .mermaid SVG, serialize to string, copy to clipboard */
+  const gchar *script =
+    "var el = document.querySelector('.mermaid:hover svg') || document.querySelector('.mermaid svg');"
+    "if(el){"
+    "  var s = new XMLSerializer().serializeToString(el);"
+    "  var b = new Blob([s],{type:'image/svg+xml'});"
+    "  navigator.clipboard.writeText(s);"
+    "}";
+  webkit_web_view_run_javascript (web_view, script, NULL, NULL, NULL);
+}
+
 static gboolean
 context_menu_cb  (WebKitWebView       *web_view,
                   WebKitContextMenu   *context_menu,
@@ -110,7 +125,15 @@ context_menu_cb  (WebKitWebView       *web_view,
                   WebKitHitTestResult *hit_test_result,
                   gpointer             user_data)
 {
-  return TRUE;
+  /* Clear default menu and add custom items (#44) */
+  webkit_context_menu_remove_all (context_menu);
+
+  GtkAction *copy_action = gtk_action_new ("copy-diagram", "Copy Diagram SVG", NULL, NULL);
+  g_signal_connect (copy_action, "activate", G_CALLBACK (copy_diagram_cb), web_view);
+  webkit_context_menu_append (context_menu,
+    webkit_context_menu_item_new (copy_action));
+
+  return FALSE;
 }
 
 static void
