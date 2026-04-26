@@ -26,7 +26,7 @@ to upstream libraries such as *hoedown* and *charter* should try to match the st
 * Since we are working heavily with gnome libraries, use glib types and functions over C standards when possible
   * Use ``gchar *`` instead of ``char *``
   * Use ``g_malloc ()`` and ``g_free ()`` over ``malloc ()`` and ``free ()``
-  * Use ``g_print ()`` and ``g_err ()``
+  * Use ``g_debug ()`` and ``g_warning ()`` (never ``g_print ()`` in production code)
   * etc...
 * Namespacing
   * All filenames are prefaced with ``marker-``
@@ -110,13 +110,15 @@ size_allocated_cb (GtkWidget     *widget,
 When making a release, do all of the following:
 
 1. Update the version number in the ``meson.build``
-2. Add a release into ``data/com.github.fabiocolacio.marker.appdata.xml``.
-3. Validate the appdata file with the command ``appstream-util validate-relax data/com.github.fabiocolacio.marker.appdata.xml``.
-4. Create a release archive using the script ``archive.sh``
-5. Create a release on GitHub (see guidelines for release notes below).
-6. Update the tag name in the flatpak manifest of the [flathub repo](https://github.com/flathub/com.github.fabiocolacio.marker)
-    * If you do not have push access, create a pull request.
-      Someone who has push access will merge it for you.
+2. Add a release into ``data/com.github.fabiocolacio.marker.appdata.xml``
+3. Validate: ``appstream-util validate-relax data/com.github.fabiocolacio.marker.appdata.xml``
+4. Build and test: ``meson setup builddir && ninja -C builddir && meson test -C builddir``
+5. Tag: ``git tag -a vYYYY.MM.DD -m "Release vYYYY.MM.DD"``
+6. Build release tarball: ``DESTDIR=/tmp/pkg meson install -C builddir && cd /tmp/pkg && tar czf marker-enhanced-*.tar.gz .``
+7. Create GitHub release and upload tarball
+8. Update AUR packages:
+   - ``marker-enhanced-bin``: update SHA256 in PKGBUILD, regenerate .SRCINFO
+   - ``marker-enhanced-git``: auto-updates (builds from master)
 
 ### Version Numbering
 

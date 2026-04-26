@@ -2,7 +2,7 @@
 
 Enhanced fork of [Marker](https://github.com/fabiocolacio/Marker) — a markdown editor for Linux made with GTK+-3.0.
 
-This fork adds security fixes, modern JS libraries, CLI batch export, dark mode, and more.
+This fork adds security fixes, modern JS libraries, powerful CLI export, dark mode, and more.
 
 [![Build](https://github.com/alfonsodg/Marker/actions/workflows/build.yml/badge.svg)](https://github.com/alfonsodg/Marker/actions/workflows/build.yml)
 
@@ -20,16 +20,28 @@ This fork adds security fixes, modern JS libraries, CLI batch export, dark mode,
 ### CLI Export
 - `marker file.md -o output.pdf` — export to PDF with Mermaid diagrams
 - `marker /dir/ -b -o /output/` — batch export all .md files to PDF
+- `marker /dir/ -b -o combined.pdf --merge` — merge all into single PDF
 - `marker file.md -o output.pdf --watch` — auto re-export on file changes
 - `marker file.md -o output.pdf --landscape` — landscape orientation
+- `marker file.md -o output.pdf --no-border` — remove diagram borders
 
 ### Editor
+- **Search and replace** (Replace / Replace All buttons in search bar)
 - **Dark mode** preview with Mermaid diagram support
-- **Drag & drop** images into editor
+- **Drag & drop** images into editor (png, jpg, gif, svg, webp)
 - **Scroll sync** between editor and preview in dual-pane mode
 - **TOC sidebar** with document outline from headings
-- **Table of contents** auto-generated in PDF export
-- **Page numbers** in PDF export
+- **Persistent zoom** per editor tab
+- **Keyboard shortcuts**: Ctrl+T (table), Ctrl+Shift+M (mermaid template), Ctrl+K (link)
+- **Emoji support**: `:rocket:` → 🚀, `:warning:` → ⚠️, `:white_check_mark:` → ✅
+
+### PDF Export
+- **Page numbers** at bottom of each page
+- **Styled tables** with borders, striping, and padding
+- **Syntax highlighting** colors preserved in PDF
+- **Link URLs** shown in parentheses after link text
+- **Auto heading numbering** (1. Title, 1.1 Subtitle)
+- **One diagram per page** in A4 format
 
 ### Code Quality
 - Memory leaks fixed (GObject dispose/finalize)
@@ -64,11 +76,26 @@ This fork adds security fixes, modern JS libraries, CLI batch export, dark mode,
 ### Arch Linux (AUR)
 
 ```bash
-# Prebuilt binary (recommended)
+# Prebuilt binary (recommended, instant install)
 yay -S marker-enhanced-bin
 
-# Build from source
+# Build from source (compiles latest master)
 yay -S marker-enhanced-git
+```
+
+### Flatpak
+
+```bash
+# Build from manifest
+flatpak-builder --install build com.github.fabiocolacio.marker.yml
+```
+
+### AppImage
+
+```bash
+# Build portable AppImage
+./build-appimage.sh
+./Marker-Enhanced-x86_64.AppImage
 ```
 
 ### From Source
@@ -107,6 +134,9 @@ marker document.md -o output.pdf
 # Batch export entire directory
 marker /path/to/docs/ -b -o /path/to/pdfs/
 
+# Merge all into single PDF
+marker /path/to/docs/ -b -o combined.pdf --merge
+
 # Watch mode — re-export on every save
 marker document.md -o output.pdf --watch
 
@@ -122,6 +152,23 @@ marker document.md -p    # preview only
 marker document.md -d    # dual pane
 marker document.md -w    # dual window
 ```
+
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| Ctrl+T | Insert table template |
+| Ctrl+K | Insert link |
+| Ctrl+Shift+M | Insert Mermaid diagram template |
+| Ctrl+B | Bold |
+| Ctrl+I | Italic |
+| Ctrl+M | Monospace |
+| Ctrl+F | Find |
+| Ctrl+R | Refresh preview |
+| Ctrl+D | Open sketcher |
+| Ctrl+N | New tab |
+| Ctrl+Shift+N | New window |
+| Ctrl+Q | Quit |
 
 ## Credits
 
