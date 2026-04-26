@@ -46,6 +46,7 @@ static gboolean dual_window_mode_arg = FALSE;
 static gboolean batch_mode_arg = FALSE;
 static gboolean landscape_arg = FALSE;
 static gboolean watch_arg = FALSE;
+static gboolean merge_arg = FALSE;
 static gchar *outfile_arg = NULL;
 
 static const GOptionEntry CLI_OPTIONS[] =
@@ -58,6 +59,7 @@ static const GOptionEntry CLI_OPTIONS[] =
   { "batch", 'b', 0, G_OPTION_ARG_NONE, &batch_mode_arg, "Batch export all .md files in directory to PDF", NULL },
   { "landscape", 'l', 0, G_OPTION_ARG_NONE, &landscape_arg, "Use landscape orientation for PDF export", NULL },
   { "watch", 'W', 0, G_OPTION_ARG_NONE, &watch_arg, "Watch file for changes and re-export automatically", NULL },
+  { "merge", 'm', 0, G_OPTION_ARG_NONE, &merge_arg, "Merge batch PDFs into a single file (requires --batch)", NULL },
   { NULL }
 };
 
@@ -149,19 +151,65 @@ marker_open(GtkApplication* app,
     }
     const gchar *name;
     g_autofree gchar *out_dir = outfile_arg ? g_strdup (outfile_arg) : g_strdup (dir_path);
+
+    /* Count .md files first for progress (#41) */
+    guint total = 0, current = 0;
+    while ((name = g_dir_read_name (dir)) != NULL) {
+      if (g_str_has_suffix (name, ".md")) total++;
+    }
+    g_dir_rewind (dir);
     g_mkdir_with_parents (out_dir, 0755);
 
     while ((name = g_dir_read_name (dir)) != NULL) {
       if (!g_str_has_suffix (name, ".md"))
         continue;
+      current++;
       g_autofree gchar *infile = g_build_filename (dir_path, name, NULL);
       g_autofree gchar *basename = g_strdup (name);
       basename[strlen(basename) - 3] = '\0';
       g_autofree gchar *outfile = g_build_filename (out_dir, g_strdup_printf ("%s.pdf", basename), NULL);
-      g_print ("Exporting %s → %s\n", name, outfile);
+      g_print ("[%u/%u] Exporting %s\n", current, total, name);
       marker_exporter_export (infile, outfile);
     }
     g_dir_close (dir);
+
+    /* Merge all PDFs into one if --merge (#36) */
+    if (merge_arg && outfile_arg) {
+      g_autofree gchar *merge_out = g_strdup (outfile_arg);
+      /* Collect all generated PDFs */
+      GDir *pdf_dir = g_dir_open (out_dir, 0, NULL);
+      if (pdf_dir) {
+        GPtrArray *pdf_files = g_ptr_array_new_with_free_func (g_free);
+        const gchar *pdf_name;
+        while ((pdf_name = g_dir_read_name (pdf_dir)) != NULL) {
+          if (g_str_has_suffix (pdf_name, ".pdf"))
+            g_ptr_array_add (pdf_files, g_build_filename (out_dir, pdf_name, NULL));
+        }
+        g_dir_close (pdf_dir);
+
+        if (pdf_files->len > 0) {
+          /* Build pdfunite command argv */
+          gchar **argv = g_new0 (gchar*, pdf_files->len + 3);
+          argv[0] = "pdfunite";
+          for (guint i = 0; i < pdf_files->len; i++)
+            argv[i + 1] = g_ptr_array_index (pdf_files, i);
+          argv[pdf_files->len + 1] = merge_out;
+
+          g_print ("Merging %u PDFs → %s\n", pdf_files->len, merge_out);
+          GError *error = NULL;
+          gint status;
+          g_spawn_sync (NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
+                        NULL, NULL, NULL, NULL, &status, &error);
+          if (error) {
+            g_printerr ("merge failed: %s\n", error->message);
+            g_error_free (error);
+          }
+          g_free (argv);
+        }
+        g_ptr_array_unref (pdf_files);
+      }
+    }
+
     exit (0);
   }
 
