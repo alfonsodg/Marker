@@ -47,6 +47,7 @@ static gboolean batch_mode_arg = FALSE;
 static gboolean landscape_arg = FALSE;
 static gboolean watch_arg = FALSE;
 static gboolean merge_arg = FALSE;
+static gboolean no_border_arg = FALSE;
 static gchar *outfile_arg = NULL;
 
 static const GOptionEntry CLI_OPTIONS[] =
@@ -60,6 +61,7 @@ static const GOptionEntry CLI_OPTIONS[] =
   { "landscape", 'l', 0, G_OPTION_ARG_NONE, &landscape_arg, "Use landscape orientation for PDF export", NULL },
   { "watch", 'W', 0, G_OPTION_ARG_NONE, &watch_arg, "Watch file for changes and re-export automatically", NULL },
   { "merge", 'm', 0, G_OPTION_ARG_NONE, &merge_arg, "Merge batch PDFs into a single file (requires --batch)", NULL },
+  { "no-border", 0, 0, G_OPTION_ARG_NONE, &no_border_arg, "Remove borders from diagrams in PDF export", NULL },
   { NULL }
 };
 

@@ -184,9 +184,26 @@ html_footer(MarkerMathJSMode     mathjs_mode,
       break;
   }
 
-  char* buffer = g_strdup_printf("%s\n%s\n%s\n", mathjs_render, highlight_render, mermaid_render);
+  /* Emoji shortcode conversion (#42) */
+  char *emoji_script = g_strdup(
+    "<script>document.addEventListener('DOMContentLoaded',function(){"
+    "var m={rocket:'🚀',warning:'⚠️',white_check_mark:'✅',x:'❌',star:'⭐',"
+    "fire:'🔥',bug:'🐛',bulb:'💡',memo:'📝',lock:'🔒',key:'🔑',"
+    "gear:'⚙️',package:'📦',chart_with_upwards_trend:'📈',"
+    "heavy_check_mark:'✔️',heavy_multiplication_x:'✖️',"
+    "arrow_right:'➡️',arrow_left:'⬅️',arrow_up:'⬆️',arrow_down:'⬇️',"
+    "information_source:'ℹ️',exclamation:'❗',question:'❓',"
+    "thumbsup:'👍',thumbsdown:'👎',tada:'🎉',construction:'🚧',"
+    "zap:'⚡',shield:'🛡️',link:'🔗',clock:'🕐',earth_americas:'🌎'};"
+    "var b=document.body.innerHTML;"
+    "Object.keys(m).forEach(function(k){b=b.replace(new RegExp(':'+k+':','g'),m[k]);});"
+    "document.body.innerHTML=b;"
+    "});</script>");
+
+  char* buffer = g_strdup_printf("%s\n%s\n%s\n%s\n", mathjs_render, highlight_render, mermaid_render, emoji_script);
   g_free(highlight_render);
   g_free(mathjs_render);
+  g_free(emoji_script);
   g_free(mermaid_render);
   return buffer;
 }

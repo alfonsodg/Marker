@@ -288,6 +288,14 @@ tr:nth-child(even) {
 }
 
 /* === BOTH: text and line styling === */
+
+/* Auto heading numbering (#45) */
+body { counter-reset: h2c; }
+h2 { counter-reset: h3c; counter-increment: h2c; }
+h3 { counter-increment: h3c; }
+h2:before { content: counter(h2c) ". "; }
+h3:before { content: counter(h2c) "." counter(h3c) " "; }
+
 .mermaid svg text {
   font-size: 14px !important;
 }
