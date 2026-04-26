@@ -181,30 +181,22 @@ img {
   unicode-bidi: plaintext;
 }
 
-/* === SCREEN: preview visual — each diagram in uniform A4 frame === */
+/* === SCREEN: all diagrams same width, natural height === */
 .mermaid {
   width: 100%;
-  aspect-ratio: 210 / 297;
-  max-height: 80vh;
-  overflow: hidden;
-  margin: 4px 0;
-  padding: 8px;
+  margin: 8px 0;
+  padding: 10px;
   border: 1px solid #e0e0e0;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: #fafafa;
 }
 
 .mermaid svg {
-  max-width: 100% !important;
-  max-height: 100% !important;
-  width: auto !important;
+  width: 100% !important;
   height: auto !important;
 }
 
 h3 {
-  margin-top: 12px;
+  margin-top: 16px;
   margin-bottom: 4px;
 }
 
