@@ -181,17 +181,21 @@ img {
   unicode-bidi: plaintext;
 }
 
-/* === SCREEN: preview visual — diagrams fit viewport === */
+/* === SCREEN: preview visual — each diagram in A4-like frame === */
 .mermaid {
   width: 100%;
-  overflow: visible;
-  margin: 8px 0;
+  height: 70vh;
+  overflow: hidden;
+  margin: 4px 0;
   padding: 0;
+  border: 1px solid #ddd;
+  background: #fff;
 }
 
 .mermaid svg {
-  max-width: 100% !important;
-  height: auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
 }
 
 h3 {
