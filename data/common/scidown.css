@@ -266,7 +266,8 @@ tr:nth-child(even) {
     print-color-adjust: exact;
   }
 
-  h3 {
+  /* Page break only for headings followed by a diagram */
+  h3:has(+ .mermaid) {
     page-break-before: always;
     page-break-after: avoid;
     margin-top: 0;
