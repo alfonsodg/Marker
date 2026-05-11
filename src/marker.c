@@ -152,7 +152,15 @@ marker_open(GtkApplication* app,
       exit (1);
     }
     const gchar *name;
-    g_autofree gchar *out_dir = outfile_arg ? g_strdup (outfile_arg) : g_strdup (dir_path);
+    /* Resolve output dir to absolute path (chdir in exporter breaks relative paths) */
+    g_autofree gchar *out_dir = NULL;
+    if (outfile_arg) {
+      GFile *f = g_file_new_for_commandline_arg (outfile_arg);
+      out_dir = g_file_get_path (f);
+      g_object_unref (f);
+    } else {
+      out_dir = g_strdup (dir_path);
+    }
 
     /* Count .md files first for progress (#41) */
     guint total = 0, current = 0;
