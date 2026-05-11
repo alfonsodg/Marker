@@ -261,30 +261,26 @@ tr:nth-child(even) {
     print-color-adjust: exact;
   }
 
-  .mermaid svg {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  /* Page break only for headings followed by a diagram */
-  h3:has(+ .mermaid) {
-    page-break-before: always;
-    page-break-after: avoid;
-    margin-top: 0;
-    margin-bottom: 2mm;
-  }
-
+  /* Each diagram on its own page with title */
   .mermaid {
     width: 190mm;
-    max-height: 250mm;
+    height: 250mm;
     overflow: hidden;
-    page-break-before: avoid;
+    page-break-before: always;
     page-break-inside: avoid;
+    page-break-after: avoid;
+  }
+
+  /* Keep heading attached to its diagram (no orphan title) */
+  h2, h3 {
+    page-break-after: avoid;
   }
 
   .mermaid svg {
     width: 190mm !important;
-    max-height: 250mm !important;
+    height: 250mm !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }
 
