@@ -198,6 +198,10 @@ html_footer(MarkerMathJSMode     mathjs_mode,
     "var b=document.body.innerHTML;"
     "Object.keys(m).forEach(function(k){b=b.replace(new RegExp(':'+k+':','g'),m[k]);});"
     "document.body.innerHTML=b;"
+    "document.querySelectorAll('.mermaid').forEach(function(d){"
+    "var prev=d.previousElementSibling;"
+    "if(prev&&(prev.tagName==='H2'||prev.tagName==='H3'))prev.classList.add('diagram-title');"
+    "});"
     "});</script>");
 
   char* buffer = g_strdup_printf("%s\n%s\n%s\n%s\n", mathjs_render, highlight_render, mermaid_render, emoji_script);
