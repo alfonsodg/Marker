@@ -282,6 +282,19 @@ tr:nth-child(even) {
     page-break-after: avoid;
   }
 
+  /* Tables: avoid splitting across pages */
+  table {
+    page-break-inside: avoid;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
   .mermaid svg {
     width: 190mm !important;
     height: 250mm !important;
