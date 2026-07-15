@@ -202,6 +202,17 @@ html_footer(MarkerMathJSMode     mathjs_mode,
     "var prev=d.previousElementSibling;"
     "if(prev&&(prev.tagName==='H2'||prev.tagName==='H3'))prev.classList.add('diagram-title');"
     "});"
+    /* Group heading + next element to prevent page break between them */
+    "document.querySelectorAll('h2,h3,h4').forEach(function(h){"
+    "var next=h.nextElementSibling;"
+    "if(next&&(next.tagName==='TABLE'||next.tagName==='UL'||next.tagName==='OL'||next.tagName==='PRE')){"
+    "var wrap=document.createElement('div');"
+    "wrap.style.pageBreakInside='avoid';"
+    "h.parentNode.insertBefore(wrap,h);"
+    "wrap.appendChild(h);"
+    "wrap.appendChild(next);"
+    "}"
+    "});"
     "});</script>");
 
   char* buffer = g_strdup_printf("%s\n%s\n%s\n%s\n", mathjs_render, highlight_render, mermaid_render, emoji_script);

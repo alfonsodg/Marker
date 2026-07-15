@@ -277,18 +277,13 @@ tr:nth-child(even) {
     page-break-inside: avoid;
   }
 
-  /* Force each section on new page — title always with its content */
-  h2 {
-    page-break-before: always;
-    margin-top: 0;
+  /* Prevent orphan headings at bottom of page */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    break-after: avoid;
   }
 
-  h3:has(+ table), h3:has(+ .mermaid) {
-    page-break-before: always;
-    margin-top: 0;
-  }
-
-  /* Tables: never split across pages */
+  /* Tables: never split, heading stays attached */
   table {
     page-break-inside: avoid;
   }
@@ -299,6 +294,12 @@ tr:nth-child(even) {
 
   thead {
     display: table-header-group;
+  }
+
+  /* Small tables with their heading: keep together */
+  h2 + table, h3 + table, h4 + table,
+  h2 + p + table, h3 + p + table {
+    page-break-before: avoid;
   }
 
   .mermaid svg {
