@@ -277,14 +277,15 @@ tr:nth-child(even) {
     page-break-inside: avoid;
   }
 
-  /* Keep heading attached to its diagram */
-  h2, h3 {
+  /* Keep heading attached to its content (table or diagram) */
+  h1, h2, h3, h4, h5, h6 {
     page-break-after: avoid;
   }
 
-  /* Tables: avoid splitting across pages */
+  /* Tables: avoid splitting and keep attached to heading above */
   table {
     page-break-inside: avoid;
+    page-break-before: avoid;
   }
 
   tr {
