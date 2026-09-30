@@ -364,10 +364,9 @@ marker_export_report (GtkWindow     *window,
   g_signal_connect (dialog, "response",
                     G_CALLBACK (marker_export_report_response_cb), NULL);
 
-  /* gtk_window_present also asks for focus: under Wayland a plain
-     gtk_widget_show leaves the dialog behind the main window (#52) */
-  gtk_window_set_modal (GTK_WINDOW (dialog), TRUE);
-  gtk_window_present (GTK_WINDOW (dialog));
+  /* Match the overwrite prompt, which is the dialog that actually shows up
+     here: gtk_widget_show, not gtk_window_present (#52) */
+  gtk_widget_show (dialog);
 }
 
 /* Data for the deferred result notice (#52) */
