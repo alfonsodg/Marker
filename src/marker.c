@@ -290,8 +290,8 @@ marker_export_pdf_cb(GSimpleAction* action,
                      GVariant*      parameter,
                      gpointer       user_data)
 {
-  GtkApplication *application = user_data;
-  GtkWindow *window;
+  GtkApplication *application;
+  GtkWindow *window = NULL;
   MarkerWindow *marker_window;
   MarkerEditor *editor;
   GFile *file;
@@ -300,19 +300,33 @@ marker_export_pdf_cb(GSimpleAction* action,
   g_autofree gchar *dir = NULL;
   g_autofree gchar *outfile = NULL;
 
-  window = gtk_application_get_active_window (application);
+  /* The action is registered twice: once with the application (app menu)
+     and once with the window (gear popover). Accept either (#52). */
+  if (G_IS_APPLICATION (user_data)) {
+    application = GTK_APPLICATION (user_data);
+    window = gtk_application_get_active_window (application);
+  } else if (MARKER_IS_WINDOW (user_data)) {
+    window = GTK_WINDOW (user_data);
+    application = gtk_window_get_application (window);
+  } else {
+    g_printerr ("marker: export-pdf got an unexpected user_data\n");
+    return;
+  }
+
   if (!MARKER_IS_WINDOW (window)) {
+    g_printerr ("marker: export-pdf has no active window\n");
     return;
   }
   marker_window = MARKER_WINDOW (window);
   editor = marker_window_get_active_editor (marker_window);
   if (editor == NULL) {
+    g_printerr ("marker: export-pdf has no active editor\n");
     return;
   }
 
   file = marker_editor_get_file (editor);
   if (!G_IS_FILE (file)) {
-    /* Never saved: fall back to the full export dialog (#53) */
+    /* Never saved: fall back to the full export dialog (#52) */
     marker_exporter_show_export_dialog (marker_window);
     return;
   }
@@ -321,6 +335,8 @@ marker_export_pdf_cb(GSimpleAction* action,
   stem = pdf_path_for (src);
   dir = g_path_get_dirname (src);
   outfile = g_build_filename (dir, stem, NULL);
+
+  g_printerr ("marker: exporting %s to %s\n", src, outfile);
 
   if (g_file_test (outfile, G_FILE_TEST_EXISTS)) {
     GtkWidget *dialog;
@@ -344,7 +360,30 @@ marker_export_pdf_cb(GSimpleAction* action,
     }
   }
 
+  /* Export reads the file from disk, so flush pending edits first (#52) */
+  if (marker_editor_has_unsaved_changes (editor)) {
+    marker_editor_save_file (editor);
+  }
+
   marker_exporter_export (src, outfile);
+
+  if (g_file_test (outfile, G_FILE_TEST_EXISTS)) {
+    GtkWidget *info = gtk_message_dialog_new (window,
+                                              GTK_DIALOG_DESTROY_WITH_PARENT,
+                                              GTK_MESSAGE_INFO,
+                                              GTK_BUTTONS_CLOSE,
+                                              _("PDF exported to:\n%s"), outfile);
+    gtk_dialog_run (GTK_DIALOG (info));
+    g_object_unref (info);
+  } else {
+    GtkWidget *err = gtk_message_dialog_new (window,
+                                             GTK_DIALOG_DESTROY_WITH_PARENT,
+                                             GTK_MESSAGE_ERROR,
+                                             GTK_BUTTONS_CLOSE,
+                                             _("The PDF could not be created at:\n%s"), outfile);
+    gtk_dialog_run (GTK_DIALOG (err));
+    g_object_unref (err);
+  }
 }
 
 void
