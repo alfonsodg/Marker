@@ -291,6 +291,17 @@ typedef struct {
   gchar *out;
 } ExportJob;
 
+static gboolean marker_export_pdf_idle_cb (gpointer data);
+
+static void
+marker_export_start (const gchar *src, const gchar *out)
+{
+  ExportJob *job = g_new0 (ExportJob, 1);
+  job->src = g_strdup (src);
+  job->out = g_strdup (out);
+  g_idle_add (marker_export_pdf_idle_cb, job);
+}
+
 static gboolean
 marker_export_pdf_idle_cb (gpointer data)
 {
@@ -306,6 +317,58 @@ marker_export_pdf_idle_cb (gpointer data)
   g_free (job->out);
   g_free (job);
   return G_SOURCE_REMOVE;
+}
+
+/* Overwrite confirmation. Fully async: gtk_dialog_run would nest a second
+   main loop inside the one serving the click handler, which froze the
+   export. The export only starts from the response callback (#52). */
+typedef struct {
+  gchar *src;
+  gchar *out;
+} ConfirmCtx;
+
+static void
+marker_overwrite_response_cb (GtkDialog *dialog, gint response, gpointer data)
+{
+  ConfirmCtx *ctx = data;
+
+  if (response == GTK_RESPONSE_ACCEPT) {
+    marker_export_start (ctx->src, ctx->out);
+  }
+  gtk_widget_destroy (GTK_WIDGET (dialog));
+  g_free (ctx->src);
+  g_free (ctx->out);
+  g_free (ctx);
+}
+
+static void
+marker_export_ask_overwrite (GtkWindow *window,
+                             const gchar *src,
+                             const gchar *out)
+{
+  g_autofree gchar *stem = g_path_get_basename (out);
+  GtkWidget *dialog;
+  ConfirmCtx *ctx;
+
+  dialog = gtk_message_dialog_new (window,
+                                   GTK_DIALOG_DESTROY_WITH_PARENT,
+                                   GTK_MESSAGE_QUESTION,
+                                   GTK_BUTTONS_NONE,
+                                   _("\"%s\" already exists. Overwrite it?"),
+                                   stem);
+  gtk_dialog_add_buttons (GTK_DIALOG (dialog),
+                          _("_Cancel"), GTK_RESPONSE_CANCEL,
+                          _("_Overwrite"), GTK_RESPONSE_ACCEPT,
+                          NULL);
+  gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
+
+  ctx = g_new0 (ConfirmCtx, 1);
+  ctx->src = g_strdup (src);
+  ctx->out = g_strdup (out);
+
+  g_signal_connect (dialog, "response",
+                    G_CALLBACK (marker_overwrite_response_cb), ctx);
+  gtk_widget_show (dialog);
 }
 
 void
@@ -361,42 +424,17 @@ marker_export_pdf_cb(GSimpleAction* action,
 
   g_printerr ("marker: exporting %s to %s\n", src, outfile);
 
-  if (g_file_test (outfile, G_FILE_TEST_EXISTS)) {
-    GtkWidget *dialog;
-    gint response;
-
-    dialog = gtk_message_dialog_new (window,
-                                     GTK_DIALOG_MODAL,
-                                     GTK_MESSAGE_QUESTION,
-                                     GTK_BUTTONS_NONE,
-                                     _("\"%s\" already exists. Overwrite it?"),
-                                     stem);
-    gtk_dialog_add_buttons (GTK_DIALOG (dialog),
-                            _("_Cancel"), GTK_RESPONSE_CANCEL,
-                            _("_Overwrite"), GTK_RESPONSE_ACCEPT,
-                            NULL);
-    gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
-    response = gtk_dialog_run (GTK_DIALOG (dialog));
-    g_object_unref (dialog);
-    if (response != GTK_RESPONSE_ACCEPT) {
-      return;
-    }
-  }
-
   /* Export reads the file from disk, so flush pending edits first (#52) */
   if (marker_editor_has_unsaved_changes (editor)) {
     marker_editor_save_file (editor);
   }
 
-  /* marker_exporter_export runs its own GMainLoop, which must not nest inside
-     the one already serving this click handler. Defer it to an idle callback
-     so the export starts on a fresh iteration of the main loop (#52). */
-  {
-    ExportJob *job = g_new0 (ExportJob, 1);
-    job->src = g_strdup (src);
-    job->out = g_strdup (outfile);
-    g_idle_add (marker_export_pdf_idle_cb, job);
+  if (g_file_test (outfile, G_FILE_TEST_EXISTS)) {
+    marker_export_ask_overwrite (window, src, outfile);
+    return;
   }
+
+  marker_export_start (src, outfile);
 }
 
 void
