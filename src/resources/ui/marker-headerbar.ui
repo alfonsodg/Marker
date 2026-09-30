@@ -44,6 +44,18 @@
       </packing>
     </child>
     <child>
+      <object class="GtkButton" id="export_pdf_btn">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="icon_name">document-export-symbolic</property>
+        <property name="tooltip_text" translatable="yes">Export to PDF (same name)</property>
+        <property name="action-name">app.export-pdf</property>
+      </object>
+      <packing>
+        <property name="pack_type">end</property>
+      </packing>
+    </child>
+    <child>
       <object class="GtkMenuButton" id="menu_btn">
         <property name="visible">True</property>
         <property name="image">open-menu</property>

@@ -942,17 +942,28 @@ marker_window_init (MarkerWindow *window)
   gtk_menu_button_set_popover (menu_btn, popover);
   gtk_menu_button_set_direction (menu_btn, GTK_ARROW_DOWN);
 
-  if (!marker_has_app_menu ())
+  /* The quick PDF export lives in the gear popover, so register its action
+     and reveal the section unconditionally (#52). */
   {
     GtkWidget *extra_items_start = GTK_WIDGET (gtk_builder_get_object (builder, "appmenu_popover_items_start"));
+    if (extra_items_start != NULL) {
+      gtk_widget_set_visible (extra_items_start, TRUE);
+      GtkApplication* app = marker_get_app ();
+      if (app != NULL) {
+        g_action_map_add_action_entries (G_ACTION_MAP(app),
+                                         APP_MENU_ACTION_ENTRIES,
+                                         APP_MENU_ACTION_ENTRIES_LEN,
+                                         window);
+      }
+    }
+  }
+
+  if (!marker_has_app_menu ())
+  {
     GtkWidget *extra_items_end = GTK_WIDGET (gtk_builder_get_object (builder, "appmenu_popover_items_end"));
-    gtk_widget_set_visible(extra_items_start, TRUE);
-    gtk_widget_set_visible(extra_items_end, TRUE);
-    GtkApplication* app = marker_get_app ();
-    g_action_map_add_action_entries (G_ACTION_MAP(app),
-                                     APP_MENU_ACTION_ENTRIES,
-                                     APP_MENU_ACTION_ENTRIES_LEN,
-                                     window);
+    if (extra_items_end != NULL) {
+      gtk_widget_set_visible (extra_items_end, TRUE);
+    }
   }
 
   /** Window **/
