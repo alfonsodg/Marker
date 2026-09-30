@@ -309,23 +309,28 @@ marker_export_start (const gchar     *src,
   g_idle_add (marker_export_pdf_idle_cb, job);
 }
 
-/* Single response handler for the result notice: optionally opens the
-   folder, then destroys the dialog. Two handlers on the same signal made
-   the destroy callback run in an order that never showed the notice. */
+/* Single response handler for the result notice: opens the folder when
+   requested, then destroys the dialog. The directory is stored on the dialog
+   with g_object_set_data_full, so it is released exactly once even if the
+   response signal fires more than once. */
 static void
 marker_export_report_response_cb (GtkDialog *dialog, gint response, gpointer data)
 {
-  g_autofree gchar *dir = data;
+  (void) data;
 
-  if (response == GTK_RESPONSE_ACCEPT && dir != NULL) {
-    const gchar *argv[] = { "xdg-open", dir, NULL };
-    GError *error = NULL;
+  if (response == GTK_RESPONSE_ACCEPT) {
+    const gchar *dir = g_object_get_data (G_OBJECT (dialog), "export-dir");
 
-    if (!g_spawn_async (NULL, (gchar **) argv, NULL,
-                        G_SPAWN_SEARCH_PATH, NULL, NULL,
-                        NULL, &error)) {
-      g_printerr ("marker: could not open folder %s: %s\n", dir, error->message);
-      g_error_free (error);
+    if (dir != NULL) {
+      const gchar *argv[] = { "xdg-open", dir, NULL };
+      GError *error = NULL;
+
+      if (!g_spawn_async (NULL, (gchar **) argv, NULL,
+                          G_SPAWN_SEARCH_PATH, NULL, NULL,
+                          NULL, &error)) {
+        g_printerr ("marker: could not open folder %s: %s\n", dir, error->message);
+        g_error_free (error);
+      }
     }
   }
   gtk_widget_destroy (GTK_WIDGET (dialog));
@@ -350,19 +355,37 @@ marker_export_report (GtkWindow     *window,
   if (made) {
     gtk_dialog_add_button (GTK_DIALOG (dialog), _("Show _Folder"), GTK_RESPONSE_ACCEPT);
     gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
-    g_signal_connect (dialog, "response",
-                      G_CALLBACK (marker_export_report_response_cb),
-                      g_path_get_dirname (outfile));
+    g_object_set_data_full (G_OBJECT (dialog), "export-dir",
+                            g_path_get_dirname (outfile), g_free);
   } else {
     gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_CLOSE);
-    g_signal_connect (dialog, "response",
-                      G_CALLBACK (marker_export_report_response_cb), NULL);
   }
+
+  g_signal_connect (dialog, "response",
+                    G_CALLBACK (marker_export_report_response_cb), NULL);
 
   /* gtk_window_present also asks for focus: under Wayland a plain
      gtk_widget_show leaves the dialog behind the main window (#52) */
   gtk_window_set_modal (GTK_WINDOW (dialog), TRUE);
   gtk_window_present (GTK_WINDOW (dialog));
+}
+
+/* Data for the deferred result notice (#52) */
+typedef struct {
+  GtkWindow *window;
+  gchar     *out;
+  gboolean   made;
+} ReportCtx;
+
+static gboolean
+marker_export_report_idle_cb (gpointer data)
+{
+  ReportCtx *rep = data;
+
+  marker_export_report (rep->window, rep->out, rep->made);
+  g_free (rep->out);
+  g_free (rep);
+  return G_SOURCE_REMOVE;
 }
 
 static gboolean
@@ -376,7 +399,18 @@ marker_export_pdf_idle_cb (gpointer data)
   g_printerr ("marker: export %s -> %s (%s)\n",
               job->src, job->out, made ? "ok" : "FAILED");
 
-  marker_export_report (job->window, job->out, made);
+  /* The exporter runs its own nested main loop and has already returned by
+     now, so anything shown from here would be mapped inside a loop that no
+     longer exists. Defer the notice to the outermost main loop (#52). */
+  {
+    ReportCtx *rep = g_new0 (ReportCtx, 1);
+    rep->window = job->window;
+    rep->out = g_strdup (job->out);
+    rep->made = made;
+    g_printerr ("marker: enqueuing report, window=%p made=%d\n",
+                (void *) rep->window, made);
+    g_idle_add (marker_export_report_idle_cb, rep);
+  }
 
   if (job->preview != NULL) {
     g_object_unref (job->preview);
