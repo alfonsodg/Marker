@@ -290,6 +290,7 @@ typedef struct {
   gchar *src;
   gchar *out;
   MarkerPreview *preview;
+  GtkWindow *window;
 } ExportJob;
 
 static gboolean marker_export_pdf_idle_cb (gpointer data);
@@ -297,13 +298,64 @@ static gboolean marker_export_pdf_idle_cb (gpointer data);
 static void
 marker_export_start (const gchar     *src,
                      const gchar     *out,
-                     MarkerPreview   *preview)
+                     MarkerPreview   *preview,
+                     GtkWindow       *window)
 {
   ExportJob *job = g_new0 (ExportJob, 1);
   job->src = g_strdup (src);
   job->out = g_strdup (out);
   job->preview = preview ? g_object_ref (preview) : NULL;
+  job->window = window;
   g_idle_add (marker_export_pdf_idle_cb, job);
+}
+
+/* Non-blocking notice shown after the export finishes. Never uses
+   gtk_dialog_run, which would nest a main loop and stall the exporter. */
+static void
+marker_show_folder_cb (GtkDialog *dialog, gint response, gpointer data)
+{
+  g_autofree gchar *dir = data;
+  const gchar *argv[] = { "xdg-open", dir, NULL };
+  GError *error = NULL;
+
+  (void) dialog;
+  (void) response;
+  if (!g_spawn_async (NULL, (gchar **) argv, NULL,
+                      G_SPAWN_SEARCH_PATH, NULL, NULL,
+                      NULL, &error)) {
+    g_printerr ("marker: could not open folder %s: %s\n", dir, error->message);
+    g_error_free (error);
+  }
+}
+
+static void
+marker_export_report (GtkWindow     *window,
+                      const gchar   *outfile,
+                      gboolean       made)
+{
+  GtkWidget *dialog;
+
+  dialog = gtk_message_dialog_new (window,
+                                   GTK_DIALOG_DESTROY_WITH_PARENT,
+                                   made ? GTK_MESSAGE_INFO : GTK_MESSAGE_ERROR,
+                                   GTK_BUTTONS_NONE,
+                                   made ? _("PDF created at:\n%s")
+                                        : _("The PDF could not be created at:\n%s"),
+                                   outfile);
+
+  gtk_dialog_add_buttons (GTK_DIALOG (dialog), _("_Close"), GTK_RESPONSE_CLOSE, NULL);
+  if (made) {
+    gtk_dialog_add_button (GTK_DIALOG (dialog), _("Show _Folder"), GTK_RESPONSE_ACCEPT);
+    gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
+    g_signal_connect (dialog, "response",
+                      G_CALLBACK (marker_show_folder_cb),
+                      g_path_get_dirname (outfile));
+  } else {
+    gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_CLOSE);
+  }
+
+  g_signal_connect (dialog, "response", G_CALLBACK (gtk_widget_destroy), NULL);
+  gtk_widget_show (dialog);
 }
 
 static gboolean
@@ -316,6 +368,8 @@ marker_export_pdf_idle_cb (gpointer data)
   made = g_file_test (job->out, G_FILE_TEST_EXISTS);
   g_printerr ("marker: export %s -> %s (%s)\n",
               job->src, job->out, made ? "ok" : "FAILED");
+
+  marker_export_report (job->window, job->out, made);
 
   if (job->preview != NULL) {
     g_object_unref (job->preview);
@@ -333,6 +387,7 @@ typedef struct {
   gchar *src;
   gchar *out;
   MarkerPreview *preview;
+  GtkWindow *window;
 } ConfirmCtx;
 
 static void
@@ -342,7 +397,7 @@ marker_overwrite_response_cb (GtkDialog *dialog, gint response, gpointer data)
 
   g_printerr ("marker: overwrite dialog response=%d\n", response);
   if (response == GTK_RESPONSE_ACCEPT) {
-    marker_export_start (ctx->src, ctx->out, ctx->preview);
+    marker_export_start (ctx->src, ctx->out, ctx->preview, ctx->window);
   }
   gtk_widget_destroy (GTK_WIDGET (dialog));
   if (ctx->preview != NULL) {
@@ -379,6 +434,7 @@ marker_export_ask_overwrite (GtkWindow     *window,
   ctx->src = g_strdup (src);
   ctx->out = g_strdup (out);
   ctx->preview = preview ? g_object_ref (preview) : NULL;
+  ctx->window = window;
 
   g_signal_connect (dialog, "response",
                     G_CALLBACK (marker_overwrite_response_cb), ctx);
@@ -449,7 +505,7 @@ marker_export_pdf_cb(GSimpleAction* action,
     return;
   }
 
-  marker_export_start (src, outfile, marker_editor_get_preview (editor));
+  marker_export_start (src, outfile, marker_editor_get_preview (editor), window);
 }
 
 void
