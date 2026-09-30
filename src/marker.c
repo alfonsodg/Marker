@@ -285,6 +285,29 @@ pdf_path_for (const gchar* md_path)
   return g_strdup_printf ("%s.pdf", stem);
 }
 
+/* Pending quick-export job, run from the main loop (#52) */
+typedef struct {
+  gchar *src;
+  gchar *out;
+} ExportJob;
+
+static gboolean
+marker_export_pdf_idle_cb (gpointer data)
+{
+  ExportJob *job = data;
+  gboolean made;
+
+  marker_exporter_export (job->src, job->out);
+  made = g_file_test (job->out, G_FILE_TEST_EXISTS);
+  g_printerr ("marker: export %s -> %s (%s)\n",
+              job->src, job->out, made ? "ok" : "FAILED");
+
+  g_free (job->src);
+  g_free (job->out);
+  g_free (job);
+  return G_SOURCE_REMOVE;
+}
+
 void
 marker_export_pdf_cb(GSimpleAction* action,
                      GVariant*      parameter,
@@ -365,24 +388,14 @@ marker_export_pdf_cb(GSimpleAction* action,
     marker_editor_save_file (editor);
   }
 
-  marker_exporter_export (src, outfile);
-
-  if (g_file_test (outfile, G_FILE_TEST_EXISTS)) {
-    GtkWidget *info = gtk_message_dialog_new (window,
-                                              GTK_DIALOG_DESTROY_WITH_PARENT,
-                                              GTK_MESSAGE_INFO,
-                                              GTK_BUTTONS_CLOSE,
-                                              _("PDF exported to:\n%s"), outfile);
-    gtk_dialog_run (GTK_DIALOG (info));
-    g_object_unref (info);
-  } else {
-    GtkWidget *err = gtk_message_dialog_new (window,
-                                             GTK_DIALOG_DESTROY_WITH_PARENT,
-                                             GTK_MESSAGE_ERROR,
-                                             GTK_BUTTONS_CLOSE,
-                                             _("The PDF could not be created at:\n%s"), outfile);
-    gtk_dialog_run (GTK_DIALOG (err));
-    g_object_unref (err);
+  /* marker_exporter_export runs its own GMainLoop, which must not nest inside
+     the one already serving this click handler. Defer it to an idle callback
+     so the export starts on a fresh iteration of the main loop (#52). */
+  {
+    ExportJob *job = g_new0 (ExportJob, 1);
+    job->src = g_strdup (src);
+    job->out = g_strdup (outfile);
+    g_idle_add (marker_export_pdf_idle_cb, job);
   }
 }
 
