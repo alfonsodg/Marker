@@ -136,6 +136,27 @@ test_mermaid_repair_document_leaves_plain_md (void)
 }
 
 static void
+test_mermaid_repair_strips_edge_label_parens (void)
+{
+  /* Mermaid cannot parse parentheses inside an edge label (#52) */
+  gchar *r = marker_mermaid_repair_document ("```mermaid\nflowchart TB\n  A -->|SOAP (WSDL)| B\n```\n");
+  g_assert_nonnull (strstr (r, "|SOAP WSDL|"));
+  g_assert_null (strstr (r, "(WSDL)"));
+  g_free (r);
+}
+
+static void
+test_mermaid_repair_keeps_node_parens (void)
+{
+  /* Parentheses inside a node label are valid and must survive (#52) */
+  const gchar *md =
+    "```mermaid\nflowchart TB\n  DB[(\"PostgreSQL\")]\n```\n";
+  gchar *r = marker_mermaid_repair_document (md);
+  g_assert_nonnull (strstr (r, "[(\"PostgreSQL\")]"));
+  g_free (r);
+}
+
+static void
 test_read_file_nonexistent (void)
 {
   long size = 0;
@@ -181,6 +202,8 @@ main (int argc, char **argv)
   g_test_add_func ("/mermaid/repair-handles-null", test_mermaid_repair_handles_null);
   g_test_add_func ("/mermaid/repair-document-only-touches-mermaid", test_mermaid_repair_document_only_touches_mermaid);
   g_test_add_func ("/mermaid/repair-document-leaves-plain-md", test_mermaid_repair_document_leaves_plain_md);
+  g_test_add_func ("/mermaid/repair-strips-edge-label-parens", test_mermaid_repair_strips_edge_label_parens);
+  g_test_add_func ("/mermaid/repair-keeps-node-parens", test_mermaid_repair_keeps_node_parens);
   g_test_add_func ("/utils/read-file-nonexistent", test_read_file_nonexistent);
   g_test_add_func ("/utils/read-file-valid", test_read_file_valid);
 

@@ -111,10 +111,69 @@ count_delims (const char* line,
 }
 
 /*
+ * Mermaid cannot parse parentheses inside an edge label: `A -->|text (x)| B`
+ * aborts with a parse error. Mermaid itself quotes labels with double quotes
+ * instead, so the parentheses are simply removed from the label (#52).
+ *
+ * Returns: newly allocated line, or a copy of @line when nothing to strip.
+ */
+static gchar*
+fix_edge_label_parens (const char* line)
+{
+  GString *out = g_string_new (NULL);
+  const char *p = line;
+  gboolean changed = FALSE;
+
+  while (*p != '\0') {
+    /* Edge label starts with |text| right after an arrow. */
+    if (*p == '|' && p > line) {
+      char prev = p[-1];
+
+      if (prev == '-' || prev == '<' || prev == '>') {
+        const char *end = strchr (p + 1, '|');
+
+        /* Only touch a label that actually holds a parenthesis. */
+        if (end != NULL) {
+          gboolean has_paren = FALSE;
+
+          for (const char *q = p + 1; q < end; q++) {
+            if (*q == '(' || *q == ')') {
+              has_paren = TRUE;
+              break;
+            }
+          }
+          if (has_paren) {
+            g_string_append_c (out, '|');
+            for (const char *q = p + 1; q < end; q++) {
+              if (*q == '(' || *q == ')') {
+                changed = TRUE;
+                continue;
+              }
+              g_string_append_c (out, *q);
+            }
+            g_string_append_c (out, '|');
+            p = end + 1;
+            continue;
+          }
+        }
+      }
+    }
+    g_string_append_c (out, *p);
+    p++;
+  }
+
+  if (!changed) {
+    g_string_free (out, TRUE);
+    return g_strdup (line);
+  }
+  return g_string_free (out, FALSE);
+}
+
+/*
  * Balance a single line that declares a node label.
  *
  * Handles the common hand-written forms where a delimiter is missing:
- * A["Label  ->  A["Label"],  A[Label  ->  A[Label].
+ * A["Label  ->  A["Label],  A[Label  ->  A[Label].
  *
  * Lines without a node bracket, and lines whose delimiters already balance,
  * are returned verbatim so valid diagrams are never altered.
@@ -127,20 +186,25 @@ fix_line (const char* line)
   int open_sq, close_sq, open_par, close_par, quotes;
   gboolean has_bracket;
   GString *out;
+  gchar *stripped;
 
-  has_bracket = (strchr (line, '[') != NULL) || (strchr (line, '(') != NULL);
+  /* Parentheses inside an edge label always break the Mermaid parser. */
+  stripped = fix_edge_label_parens (line);
+
+  has_bracket = (strchr (stripped, '[') != NULL) || (strchr (stripped, '(') != NULL);
   if (!has_bracket) {
-    return g_strdup (line);
+    return stripped;
   }
 
-  count_delims (line, &open_sq, &close_sq, &open_par, &close_par, &quotes);
+  count_delims (stripped, &open_sq, &close_sq, &open_par, &close_par, &quotes);
 
-  /* Nothing to repair. */
+  /* Nothing else to repair. */
   if (quotes % 2 == 0 && open_sq == close_sq && open_par == close_par) {
-    return g_strdup (line);
+    return stripped;
   }
 
-  out = g_string_new (line);
+  out = g_string_new (stripped);
+  g_free (stripped);
 
   /* Unbalanced quote: close it before any trailing closers. */
   if (quotes % 2 == 1) {
