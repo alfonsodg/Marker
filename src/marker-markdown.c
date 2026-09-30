@@ -31,6 +31,7 @@
 #include "scidown/src/buffer.h"
 
 #include "marker-markdown.h"
+#include "marker-mermaid.h"
 #include "marker-prefs.h"
 
 struct css_buffer_{
@@ -213,6 +214,55 @@ html_footer(MarkerMathJSMode     mathjs_mode,
     "wrap.appendChild(next);"
     "}"
     "});"
+    /* Proportional column widths so every table reads the same (#53) */
+    "function markerFitColumns(){"
+    "document.querySelectorAll('table').forEach(function(t){"
+    "var rows=t.querySelectorAll('tr');"
+    "if(!rows.length)return;"
+    "var cols=rows[0].cells.length;"
+    "if(cols<2||cols>8)return;"
+    "var w=[];"
+    "for(var i=0;i<cols;i++){"
+    "var m=0;"
+    "for(var j=0;j<rows.length;j++){"
+    "var c=rows[j].cells[i];"
+    "if(c){var n=c.textContent.trim().length;if(n>m)m=n;}"
+    "}"
+    "w.push(Math.min(m,220));"
+    "}"
+    "var sum=w.reduce(function(a,b){return a+b;},0);"
+    "if(!sum)return;"
+    /* Floor every column so narrow ones stay readable; the header column
+       gets a higher floor because it holds the feature names. */
+    "var pct=w.map(function(v,i){return Math.max(v/sum*100,i===0?22:15);});"
+    "var tot=pct.reduce(function(a,b){return a+b;},0);"
+    "var old=t.querySelector('colgroup');"
+    "if(old)old.remove();"
+    "var cg=document.createElement('colgroup');"
+    "pct.forEach(function(v){"
+    "var col=document.createElement('col');"
+    "col.style.width=(v/tot*100).toFixed(2)+'%';"
+    "cg.appendChild(col);"
+    "});"
+    "t.insertBefore(cg,t.firstChild);"
+    "});"
+    "}"
+    "markerFitColumns();"
+    /* Shrink ASCII diagrams so they fit the printable width (#53) */
+    "document.querySelectorAll('pre').forEach(function(p){"
+    "var c=p.querySelector('code');"
+    "var t=c?c.textContent:p.textContent;"
+    "if(!t)return;"
+    "if(t.indexOf('|')<0&&t.indexOf('+--')<0)return;"
+    "var box=/^[\\s+|\\-=_.<>^v\\\\/]+$/.test(t.split('\\n')[0]);"
+    "if(!box)return;"
+    "var cols=0;t.split('\\n').forEach(function(l){if(l.length>cols)cols=l.length;});"
+    "var pt=cols>150?3:cols>130?3.6:cols>110?4.2:cols>95?5.2:cols>84?6.4:7.2;"
+    "p.style.fontSize=pt+'pt';"
+    "p.style.whiteSpace='pre-wrap';"
+    "p.style.overflowWrap='break-word';"
+    "if(c){c.style.fontSize=pt+'pt';c.style.whiteSpace='pre-wrap';}"
+    "});"
     "});</script>");
 
   char* buffer = g_strdup_printf("%s\n%s\n%s\n%s\n", mathjs_render, highlight_render, mermaid_render, emoji_script);
@@ -289,7 +339,8 @@ marker_markdown_scidown_css()
     return buffer_.scidown;
   }
 
-  gchar *path = g_strdup_printf("%s%s", STYLES_DIR, "scidown.css");
+  /* scidown.css ships in data/common (COMMON_DIR), not in the themes dir */
+  gchar *path = g_strdup_printf("%s%s", COMMON_DIR, "scidown.css");
   gchar *contents = NULL;
   gsize length;
   GError *error = NULL;
@@ -321,6 +372,15 @@ marker_markdown_to_html(const char*         markdown,
   hoedown_document* document;
   hoedown_buffer* buffer;
   scidown_render_flags html_mode = get_render_mode(mermaid_mode);
+  /* Repair Mermaid blocks only when they will actually be rendered (#53) */
+  g_autofree gchar* repaired = NULL;
+  const char* src = markdown;
+
+  if (mermaid_mode != MERMAID_OFF && markdown != NULL) {
+    repaired = marker_mermaid_repair_document (markdown);
+    src = repaired;
+    size = strlen (repaired);
+  }
 
   renderer = hoedown_html_renderer_new(html_mode, 0, get_local());
 
@@ -345,7 +405,7 @@ marker_markdown_to_html(const char*         markdown,
                                   16);
 
   buffer = hoedown_buffer_new(500);
-  hoedown_document_render(document, buffer, (uint8_t*) markdown, size, cursor_position);
+  hoedown_document_render(document, buffer, (uint8_t*) src, size, cursor_position);
 
   g_free(header);
   g_free(footer);
@@ -379,6 +439,15 @@ marker_markdown_to_html_with_css_inline(const char*         markdown,
   hoedown_document* document;
   hoedown_buffer* buffer;
   scidown_render_flags html_mode = get_render_mode(mermaid_mode);
+  /* Repair Mermaid blocks only when they will actually be rendered (#53) */
+  g_autofree gchar* repaired = NULL;
+  const char* src = markdown;
+
+  if (mermaid_mode != MERMAID_OFF && markdown != NULL) {
+    repaired = marker_mermaid_repair_document (markdown);
+    src = repaired;
+    size = strlen (repaired);
+  }
 
   renderer = hoedown_html_renderer_new(html_mode, 0, get_local());
 
@@ -415,7 +484,7 @@ marker_markdown_to_html_with_css_inline(const char*         markdown,
                                   16);
 
   buffer = hoedown_buffer_new(500);
-  hoedown_document_render(document, buffer, (uint8_t*) markdown, size, cursor_position);
+  hoedown_document_render(document, buffer, (uint8_t*) src, size, cursor_position);
 
   g_free(footer);
   g_free(header);

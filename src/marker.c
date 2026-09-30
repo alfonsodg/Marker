@@ -65,7 +65,7 @@ static const GOptionEntry CLI_OPTIONS[] =
   { NULL }
 };
 
-const int APP_MENU_ACTION_ENTRIES_LEN = 6;
+const int APP_MENU_ACTION_ENTRIES_LEN = 7;
 
 const GActionEntry APP_MENU_ACTION_ENTRIES[] =
 {
@@ -74,7 +74,8 @@ const GActionEntry APP_MENU_ACTION_ENTRIES[] =
   { "shortcuts", marker_shortcuts_cb, NULL, NULL, NULL },
   { "help", marker_help_cb, NULL, NULL, NULL },
   { "about", marker_about_cb, NULL, NULL, NULL },
-  { "quit", marker_quit_cb, NULL, NULL, NULL }
+  { "quit", marker_quit_cb, NULL, NULL, NULL },
+  { "export-pdf", marker_export_pdf_cb, NULL, NULL, NULL }
 };
 
 static void
@@ -84,6 +85,10 @@ marker_init(GtkApplication* app)
 
   const gchar *quit_accels[] = { "<Ctrl>q", NULL };
   gtk_application_set_accels_for_action (app, "app.quit", quit_accels);
+
+  /* Quick export to PDF with the same file name (#53) */
+  const gchar *export_accels[] = { "<Ctrl>e", NULL };
+  gtk_application_set_accels_for_action (app, "app.export-pdf", export_accels);
 
   if (gtk_application_prefers_app_menu(app))
   {
@@ -264,6 +269,82 @@ new_cb(GSimpleAction* action,
        gpointer       user_data)
 {
   marker_create_new_window();
+}
+
+/* Build "<same-stem>.pdf" next to the source file. */
+static gchar*
+pdf_path_for (const gchar* md_path)
+{
+  g_autofree gchar *base = g_path_get_basename (md_path);
+  g_autofree gchar *stem = g_strdup (base);
+  char *dot = g_strrstr (stem, ".");
+
+  if (dot != NULL && dot != stem) {
+    *dot = '\0';
+  }
+  return g_strdup_printf ("%s.pdf", stem);
+}
+
+void
+marker_export_pdf_cb(GSimpleAction* action,
+                     GVariant*      parameter,
+                     gpointer       user_data)
+{
+  GtkApplication *application = user_data;
+  GtkWindow *window;
+  MarkerWindow *marker_window;
+  MarkerEditor *editor;
+  GFile *file;
+  g_autofree gchar *src = NULL;
+  g_autofree gchar *stem = NULL;
+  g_autofree gchar *dir = NULL;
+  g_autofree gchar *outfile = NULL;
+
+  window = gtk_application_get_active_window (application);
+  if (!MARKER_IS_WINDOW (window)) {
+    return;
+  }
+  marker_window = MARKER_WINDOW (window);
+  editor = marker_window_get_active_editor (marker_window);
+  if (editor == NULL) {
+    return;
+  }
+
+  file = marker_editor_get_file (editor);
+  if (!G_IS_FILE (file)) {
+    /* Never saved: fall back to the full export dialog (#53) */
+    marker_exporter_show_export_dialog (marker_window);
+    return;
+  }
+
+  src = g_file_get_path (file);
+  stem = pdf_path_for (src);
+  dir = g_path_get_dirname (src);
+  outfile = g_build_filename (dir, stem, NULL);
+
+  if (g_file_test (outfile, G_FILE_TEST_EXISTS)) {
+    GtkWidget *dialog;
+    gint response;
+
+    dialog = gtk_message_dialog_new (window,
+                                     GTK_DIALOG_MODAL,
+                                     GTK_MESSAGE_QUESTION,
+                                     GTK_BUTTONS_NONE,
+                                     _("\"%s\" already exists. Overwrite it?"),
+                                     stem);
+    gtk_dialog_add_buttons (GTK_DIALOG (dialog),
+                            _("_Cancel"), GTK_RESPONSE_CANCEL,
+                            _("_Overwrite"), GTK_RESPONSE_ACCEPT,
+                            NULL);
+    gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
+    response = gtk_dialog_run (GTK_DIALOG (dialog));
+    g_object_unref (dialog);
+    if (response != GTK_RESPONSE_ACCEPT) {
+      return;
+    }
+  }
+
+  marker_exporter_export (src, outfile);
 }
 
 void

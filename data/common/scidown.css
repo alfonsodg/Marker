@@ -47,6 +47,21 @@ code {
     font-family: monospace;
 }
 
+pre {
+  font-family: "DejaVu Sans Mono", "Noto Sans Mono", monospace;
+  font-size: 8pt;
+  line-height: 1.2;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+pre code {
+  font-family: inherit;
+  font-size: inherit;
+  background: none;
+  padding: 0;
+}
+
 img {
 	max-width: 100%;
 }
@@ -286,6 +301,21 @@ tr:nth-child(even) {
   /* Tables: never split, heading stays attached */
   table {
     page-break-inside: avoid;
+    /* Fixed layout: widths come from the colgroup applied by script, so every
+       table in the document renders with the same rhythm (#53) */
+    table-layout: fixed;
+    width: 100%;
+  }
+
+  th, td {
+    overflow-wrap: break-word;
+    word-break: normal;
+    hyphens: auto;
+    vertical-align: top;
+  }
+
+  th {
+    vertical-align: middle;
   }
 
   tr {

@@ -44,6 +44,9 @@ void                 marker_help_cb                              (GSimpleAction 
 void                 new_cb                                      (GSimpleAction      *action,
                                                                   GVariant           *parameter,
                                                                   gpointer            user_data);
+void                 marker_export_pdf_cb                        (GSimpleAction      *action,
+                                                                  GVariant           *parameter,
+                                                                  gpointer            user_data);
 void                 marker_shortcuts_cb                         (GSimpleAction      *action,
                                                                   GVariant           *parameter,
                                                                   gpointer            user_data);

@@ -41,6 +41,7 @@ marker_sources = [
   'src/marker-preview.c',
   'src/marker-widget.c',
   'src/marker-sketcher-window.c',
+  'src/marker-mermaid.c',
   'src/marker-utils.c',
   res
 ]
@@ -122,6 +123,7 @@ executable(
 test_sources = [
   'src/test-marker.c',
   'src/marker-markdown.c',
+  'src/marker-mermaid.c',
   'src/marker-utils.c',
   'src/marker-prefs.c',
   'src/marker-editor.c',
@@ -131,6 +133,7 @@ test_sources = [
   'src/marker-preview.c',
   'src/marker-widget.c',
   'src/marker-sketcher-window.c',
+  'src/marker-mermaid.c',
   'src/marker.c',
   res
 ]
