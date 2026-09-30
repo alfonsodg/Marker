@@ -309,23 +309,26 @@ marker_export_start (const gchar     *src,
   g_idle_add (marker_export_pdf_idle_cb, job);
 }
 
-/* Non-blocking notice shown after the export finishes. Never uses
-   gtk_dialog_run, which would nest a main loop and stall the exporter. */
+/* Single response handler for the result notice: optionally opens the
+   folder, then destroys the dialog. Two handlers on the same signal made
+   the destroy callback run in an order that never showed the notice. */
 static void
-marker_show_folder_cb (GtkDialog *dialog, gint response, gpointer data)
+marker_export_report_response_cb (GtkDialog *dialog, gint response, gpointer data)
 {
   g_autofree gchar *dir = data;
-  const gchar *argv[] = { "xdg-open", dir, NULL };
-  GError *error = NULL;
 
-  (void) dialog;
-  (void) response;
-  if (!g_spawn_async (NULL, (gchar **) argv, NULL,
-                      G_SPAWN_SEARCH_PATH, NULL, NULL,
-                      NULL, &error)) {
-    g_printerr ("marker: could not open folder %s: %s\n", dir, error->message);
-    g_error_free (error);
+  if (response == GTK_RESPONSE_ACCEPT && dir != NULL) {
+    const gchar *argv[] = { "xdg-open", dir, NULL };
+    GError *error = NULL;
+
+    if (!g_spawn_async (NULL, (gchar **) argv, NULL,
+                        G_SPAWN_SEARCH_PATH, NULL, NULL,
+                        NULL, &error)) {
+      g_printerr ("marker: could not open folder %s: %s\n", dir, error->message);
+      g_error_free (error);
+    }
   }
+  gtk_widget_destroy (GTK_WIDGET (dialog));
 }
 
 static void
@@ -348,14 +351,18 @@ marker_export_report (GtkWindow     *window,
     gtk_dialog_add_button (GTK_DIALOG (dialog), _("Show _Folder"), GTK_RESPONSE_ACCEPT);
     gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
     g_signal_connect (dialog, "response",
-                      G_CALLBACK (marker_show_folder_cb),
+                      G_CALLBACK (marker_export_report_response_cb),
                       g_path_get_dirname (outfile));
   } else {
     gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_CLOSE);
+    g_signal_connect (dialog, "response",
+                      G_CALLBACK (marker_export_report_response_cb), NULL);
   }
 
-  g_signal_connect (dialog, "response", G_CALLBACK (gtk_widget_destroy), NULL);
-  gtk_widget_show (dialog);
+  /* gtk_window_present also asks for focus: under Wayland a plain
+     gtk_widget_show leaves the dialog behind the main window (#52) */
+  gtk_window_set_modal (GTK_WINDOW (dialog), TRUE);
+  gtk_window_present (GTK_WINDOW (dialog));
 }
 
 static gboolean
