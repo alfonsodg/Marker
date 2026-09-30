@@ -286,6 +286,15 @@ marker_exporter_export (const gchar *infile,
                         const gchar *outfile)
 {
   g_return_if_fail (infile != NULL && outfile != NULL);
+  marker_exporter_export_with_preview (infile, outfile, NULL);
+}
+
+void
+marker_exporter_export_with_preview (const gchar    *infile,
+                                     const gchar    *outfile,
+                                     MarkerPreview  *live_preview)
+{
+  g_return_if_fail (infile != NULL && outfile != NULL);
 
   long len = 0;
   g_autofree gchar *markdown = marker_utils_read_file (infile, &len);
@@ -318,28 +327,41 @@ marker_exporter_export (const gchar *infile,
                                                  stylesheet, outfile);  
   }
   else if (g_str_has_suffix (outfile, ".pdf")) {
-    GtkWidget *offscreen = gtk_offscreen_window_new ();
-    MarkerPreview *preview = marker_preview_new ();
-    gtk_container_add (GTK_CONTAINER (offscreen), GTK_WIDGET (preview));
-    gtk_widget_show_all (offscreen);
+    /* When invoked from the UI, reuse the editor's live preview: it is already
+       attached to a screen and fully rendered. Creating a detached offscreen
+       WebView from inside the running app produced no output (#52). */
+    gboolean own = FALSE;
+    MarkerPreview *preview = NULL;
+    GtkWidget *offscreen = NULL;
 
-    marker_preview_render_markdown (preview, markdown, stylesheet, infile, -1);
+    if (live_preview != NULL) {
+      preview = live_preview;
+    } else {
+      offscreen = gtk_offscreen_window_new ();
+      preview = marker_preview_new ();
+      gtk_container_add (GTK_CONTAINER (offscreen), GTK_WIDGET (preview));
+      gtk_widget_show_all (offscreen);
+      marker_preview_render_markdown (preview, markdown, stylesheet, infile, -1);
+      own = TRUE;
+    }
 
-    /* Run main loop with timeout to let WebKit load HTML + Mermaid JS render */
+    /* Let WebKit load the HTML and run the Mermaid/highlight scripts */
     GMainLoop *loop = g_main_loop_new (NULL, FALSE);
-    g_timeout_add (8000, marker_exporter_pdf_timeout_cb, loop);
+    g_timeout_add (own ? 8000 : 1500, marker_exporter_pdf_timeout_cb, loop);
     g_main_loop_run (loop);
     g_main_loop_unref (loop);
 
     marker_preview_print_pdf (preview, outfile, paper_size, orientation);
 
-    /* Let print operation complete */
+    /* Let the print operation complete */
     loop = g_main_loop_new (NULL, FALSE);
     g_timeout_add (3000, marker_exporter_pdf_timeout_cb, loop);
     g_main_loop_run (loop);
     g_main_loop_unref (loop);
 
-    gtk_widget_destroy (offscreen);
+    if (own) {
+      gtk_widget_destroy (offscreen);
+    }
   }
   else if (g_str_has_suffix (outfile, ".tex")) {
     marker_markdown_to_latex_file(markdown, len, base_folder,

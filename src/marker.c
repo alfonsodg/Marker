@@ -289,16 +289,20 @@ pdf_path_for (const gchar* md_path)
 typedef struct {
   gchar *src;
   gchar *out;
+  MarkerPreview *preview;
 } ExportJob;
 
 static gboolean marker_export_pdf_idle_cb (gpointer data);
 
 static void
-marker_export_start (const gchar *src, const gchar *out)
+marker_export_start (const gchar     *src,
+                     const gchar     *out,
+                     MarkerPreview   *preview)
 {
   ExportJob *job = g_new0 (ExportJob, 1);
   job->src = g_strdup (src);
   job->out = g_strdup (out);
+  job->preview = preview ? g_object_ref (preview) : NULL;
   g_idle_add (marker_export_pdf_idle_cb, job);
 }
 
@@ -308,11 +312,14 @@ marker_export_pdf_idle_cb (gpointer data)
   ExportJob *job = data;
   gboolean made;
 
-  marker_exporter_export (job->src, job->out);
+  marker_exporter_export_with_preview (job->src, job->out, job->preview);
   made = g_file_test (job->out, G_FILE_TEST_EXISTS);
   g_printerr ("marker: export %s -> %s (%s)\n",
               job->src, job->out, made ? "ok" : "FAILED");
 
+  if (job->preview != NULL) {
+    g_object_unref (job->preview);
+  }
   g_free (job->src);
   g_free (job->out);
   g_free (job);
@@ -325,6 +332,7 @@ marker_export_pdf_idle_cb (gpointer data)
 typedef struct {
   gchar *src;
   gchar *out;
+  MarkerPreview *preview;
 } ConfirmCtx;
 
 static void
@@ -332,19 +340,24 @@ marker_overwrite_response_cb (GtkDialog *dialog, gint response, gpointer data)
 {
   ConfirmCtx *ctx = data;
 
+  g_printerr ("marker: overwrite dialog response=%d\n", response);
   if (response == GTK_RESPONSE_ACCEPT) {
-    marker_export_start (ctx->src, ctx->out);
+    marker_export_start (ctx->src, ctx->out, ctx->preview);
   }
   gtk_widget_destroy (GTK_WIDGET (dialog));
+  if (ctx->preview != NULL) {
+    g_object_unref (ctx->preview);
+  }
   g_free (ctx->src);
   g_free (ctx->out);
   g_free (ctx);
 }
 
 static void
-marker_export_ask_overwrite (GtkWindow *window,
-                             const gchar *src,
-                             const gchar *out)
+marker_export_ask_overwrite (GtkWindow     *window,
+                             const gchar   *src,
+                             const gchar   *out,
+                             MarkerPreview *preview)
 {
   g_autofree gchar *stem = g_path_get_basename (out);
   GtkWidget *dialog;
@@ -365,6 +378,7 @@ marker_export_ask_overwrite (GtkWindow *window,
   ctx = g_new0 (ConfirmCtx, 1);
   ctx->src = g_strdup (src);
   ctx->out = g_strdup (out);
+  ctx->preview = preview ? g_object_ref (preview) : NULL;
 
   g_signal_connect (dialog, "response",
                     G_CALLBACK (marker_overwrite_response_cb), ctx);
@@ -430,11 +444,12 @@ marker_export_pdf_cb(GSimpleAction* action,
   }
 
   if (g_file_test (outfile, G_FILE_TEST_EXISTS)) {
-    marker_export_ask_overwrite (window, src, outfile);
+    marker_export_ask_overwrite (window, src, outfile,
+                                 marker_editor_get_preview (editor));
     return;
   }
 
-  marker_export_start (src, outfile);
+  marker_export_start (src, outfile, marker_editor_get_preview (editor));
 }
 
 void
