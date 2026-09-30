@@ -10,6 +10,10 @@
     <property name="icon_name">view-restore-symbolic</property>
     <property name="icon_size">2</property>
   </object>
+  <object class="GtkImage" id="export-pdf-image">
+    <property name="icon_name">document-export-symbolic</property>
+    <property name="icon_size">2</property>
+  </object>
   
   <!-- Header Bar -->
   <object class="GtkHeaderBar" id="header_bar">
@@ -47,7 +51,7 @@
       <object class="GtkButton" id="export_pdf_btn">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
-        <property name="icon_name">document-export-symbolic</property>
+        <property name="image">export-pdf-image</property>
         <property name="tooltip_text" translatable="yes">Export to PDF (same name)</property>
         <property name="action-name">app.export-pdf</property>
       </object>
