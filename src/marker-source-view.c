@@ -263,8 +263,10 @@ drag_data_received_cb (GtkWidget        *widget,
                        gpointer          user_data)
 {
   gchar **uris = gtk_selection_data_get_uris (data);
-  if (!uris)
+  if (!uris) {
+    gtk_drag_finish (context, FALSE, FALSE, time);
     return;
+  }
 
   MarkerSourceView *source_view = MARKER_SOURCE_VIEW (widget);
   GtkTextBuffer *buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (source_view));

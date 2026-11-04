@@ -31,6 +31,8 @@
 
 #include "marker.h"
 
+#define MARKER_PROJECT_URL "https://github.com/fabiocolacio/Marker"
+
 GtkApplication* app;
 
 GtkApplication*
@@ -143,6 +145,12 @@ marker_open(GtkApplication* app,
             const gchar*    hint)
 {
   g_application_hold (G_APPLICATION (app));
+
+  /* Propagate the --no-border flag to the markdown renderer (#53) */
+  if (no_border_arg) {
+    g_setenv ("MARKER_NO_BORDER", "1", TRUE);
+  }
+
   marker_init(app);
 
   /* Apply CLI flags */
@@ -592,7 +600,7 @@ marker_about_cb(GSimpleAction* action,
   gtk_about_dialog_set_program_name(dialog, "Marker");
   gtk_about_dialog_set_version(dialog, MARKER_VERSION);
   gtk_about_dialog_set_comments(dialog, _("A markdown editor for GNOME"));
-  gtk_about_dialog_set_website(dialog, "https://github.com/fabiocolacio/Marker");
+  gtk_about_dialog_set_website(dialog, MARKER_PROJECT_URL);
   gtk_about_dialog_set_website_label(dialog, _("Report bugs and ideas on github"));
   gtk_about_dialog_set_copyright(dialog, "Copyright 2017-2018 Fabio Colacio");
   gtk_about_dialog_set_license_type(dialog, GTK_LICENSE_GPL_3_0);

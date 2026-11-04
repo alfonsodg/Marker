@@ -123,11 +123,17 @@ char* html_header(MarkerMathJSMode    mathjs_mode,
       break;
   }
 
+  /* --no-border: strip the diagram border/background in print and screen */
+  const gchar *no_border_css = "";
+  if (g_getenv ("MARKER_NO_BORDER") != NULL) {
+    no_border_css = "<style>.mermaid{border:none !important;background:transparent !important;padding:0 !important;}</style>";
+  }
+
   char * buffer = g_strdup_printf("<meta http-equiv=\"Content-Security-Policy\" "
     "content=\"default-src 'none'; style-src 'self' 'unsafe-inline' file:; "
     "img-src 'self' data: file:; font-src 'self' data: file:; "
     "script-src 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com file:;\">\n"
-    "%s\n%s\n%s\n%s\n%s\n%s\n",mathjs_css, highlight_css, mathjs_script, mathjs_auto, highlight_script, mermaid_script);
+    "%s\n%s\n%s\n%s\n%s\n%s\n%s\n",mathjs_css, highlight_css, mathjs_script, mathjs_auto, highlight_script, mermaid_script, no_border_css);
 
   g_free(mathjs_script);
   g_free(mathjs_auto);
@@ -195,7 +201,14 @@ html_footer(MarkerMathJSMode     mathjs_mode,
     "arrow_right:'➡️',arrow_left:'⬅️',arrow_up:'⬆️',arrow_down:'⬇️',"
     "information_source:'ℹ️',exclamation:'❗',question:'❓',"
     "thumbsup:'👍',thumbsdown:'👎',tada:'🎉',construction:'🚧',"
-    "zap:'⚡',shield:'🛡️',link:'🔗',clock:'🕐',earth_americas:'🌎'};"
+    "zap:'⚡',shield:'🛡️',link:'🔗',clock:'🕐',earth_americas:'🌎',"
+    "heart:'❤️',smile:'😄',laughing:'😆',blush:'😊',wink:'😉',"
+    "sob:'😭',cry:'😢',angry:'😠',thinking:'🤔',pray:'🙏',"
+    "clap:'👏',muscle:'💪',ok_hand:'👌',wave:'👋',raised_hands:'🙌',"
+    "eyes:'👀',see_no_evil:'🙈',speak_no_evil:'🙊',hear_no_evil:'🙉',"
+    "100:'💯',sparkles:'✨',boom:'💥',bomb:'💣',poop:'💩',"
+    "ghost:'👻',skull:'💀',alien:'👽',robot:'🤖',"
+    "white_check_mark:'✅',ballot_box_with_check:'☑️'};"
     "var b=document.body.innerHTML;"
     "Object.keys(m).forEach(function(k){b=b.replace(new RegExp(':'+k+':','g'),m[k]);});"
     "document.body.innerHTML=b;"
@@ -409,7 +422,7 @@ marker_markdown_to_html(const char*         markdown,
 
   const char* buf_cstr = hoedown_buffer_cstr(buffer);
 
-  html = strdup(buf_cstr);
+  html = g_strdup(buf_cstr);
   hoedown_html_renderer_free(renderer);
   hoedown_document_free(document);
   hoedown_buffer_free(buffer);
@@ -487,7 +500,7 @@ marker_markdown_to_html_with_css_inline(const char*         markdown,
   g_free(header);
 
   const char* buf_cstr = hoedown_buffer_cstr(buffer);
-  html = strdup(buf_cstr);
+  html = g_strdup(buf_cstr);
 
   hoedown_html_renderer_free(renderer);
   hoedown_document_free(document);
@@ -530,7 +543,7 @@ marker_markdown_to_latex(const char*         markdown,
   hoedown_document_render(document, buffer, (uint8_t*) markdown, size, -1);
 
   const char* buf_cstr = hoedown_buffer_cstr(buffer);
-  latex = strdup(buf_cstr);
+  latex = g_strdup(buf_cstr);
   hoedown_html_renderer_free(renderer);
   hoedown_document_free(document);
   hoedown_buffer_free(buffer);
@@ -563,7 +576,7 @@ marker_markdown_to_html_file(const char*         markdown,
     fputs(html, fp);
     fclose(fp);
   }
-  free(html);
+  g_free(html);
 }
 
 void
@@ -590,7 +603,7 @@ marker_markdown_to_html_file_with_css_inline(const char*         markdown,
     fputs(html, fp);
     fclose(fp);
   }
-  free(html);
+  g_free(html);
 }
 
 void
@@ -618,7 +631,7 @@ marker_markdown_to_latex_file(const char*         markdown,
     fclose(fp);
   }
 
-  free(latex);
+  g_free(latex);
 }
 
 metadata*

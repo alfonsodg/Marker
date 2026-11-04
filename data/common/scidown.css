@@ -196,22 +196,26 @@ img {
   unicode-bidi: plaintext;
 }
 
-/* === SCREEN: uniform diagram size === */
+/* === SCREEN: use the full preview width (themes cap body width) === */
+@media screen {
+  body {
+    max-width: none !important;
+  }
+}
+
+/* === SCREEN: diagram fills the preview width === */
 .mermaid {
   width: 100%;
-  min-height: 500px;
   margin: 8px 0;
   padding: 10px;
   border: 1px solid #e0e0e0;
   background: #fafafa;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .mermaid svg {
   width: 100% !important;
-  min-height: 480px !important;
+  height: auto !important;
+  max-width: 100%;
 }
 
 h3 {
@@ -257,6 +261,32 @@ tr:nth-child(even) {
 
 /* === PRINT: PDF export === */
 @media print {
+  /* Justified body text for the exported PDF. Only in print: justified text
+     in a narrow preview window produces rivers and ugly gaps (#52). */
+  body, p, li {
+    text-align: justify;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+  }
+
+  /* Headings, code and tables stay left-aligned: justification makes short
+     lines and code blocks stretch badly. */
+  h1, h2, h3, h4, h5, h6,
+  th, td,
+  pre, code,
+  figcaption, blockquote {
+    text-align: left;
+    hyphens: none;
+  }
+
+  /* Give the justified text a little more air. */
+  p {
+    line-height: 1.5;
+    text-align: justify;
+    text-justify: inter-word;
+  }
+
   @page {
     margin: 10mm;
     @bottom-center {
@@ -300,10 +330,37 @@ tr:nth-child(even) {
     page-break-inside: avoid;
   }
 
-  /* Prevent orphan headings at bottom of page */
+  /* Keep headings and their content together (#52).
+     break-after: avoid stops a heading from being orphaned at the bottom of a
+     page. break-inside: avoid on the following block keeps a short section
+     whole instead of splitting it across two pages. */
   h1, h2, h3, h4, h5, h6 {
     page-break-after: avoid;
-    break-after: avoid;
+    break-after: avoid-page;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* A heading should not be the last thing on a page even when the browser
+     does not honour break-after on headings. */
+  h1, h2, h3, h4, h5, h6 {
+    orphans: 2;
+    widows: 2;
+  }
+
+  /* Keep small sections intact: a list, a table or a quote moves as a block
+     rather than being cut in half. Paragraphs are deliberately NOT included:
+     forcing a whole paragraph onto one page leaves large gaps and, for long
+     paragraphs, can push content off the page. */
+  ul, ol, dl, table, pre, blockquote {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Long blocks may break, but never leave a single line behind. */
+  p, li {
+    orphans: 3;
+    widows: 3;
   }
 
   /* Tables: never split, heading stays attached */

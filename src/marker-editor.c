@@ -28,6 +28,8 @@
 
 #include "marker-editor.h"
 
+#define PREVIEW_REFRESH_MS 20
+
 struct _MarkerEditor
 {
   GtkBox                parent_instance;
@@ -51,6 +53,8 @@ struct _MarkerEditor
   gboolean              needs_refresh;
   guint                 timer_id;
   gdouble               zoom_level;
+  gboolean              syncing_scroll;
+  gboolean              disposing;
 
   GtkTextIter          *text_iter;
 };
@@ -83,12 +87,14 @@ refresh_timeout_cb (gpointer user_data)
 
 static gboolean
 file_changed_cb (GFileMonitor      *monior,
-                 GFile             *file,
-                 GFile             *other_file,
-                 GFileMonitorEvent  event_type,
-                 gpointer           user_data)
+                  GFile             *file,
+                  GFile             *other_file,
+                  GFileMonitorEvent  event_type,
+                  gpointer           user_data)
 {
   MarkerEditor * editor = MARKER_EDITOR(user_data);
+  if (editor->disposing)
+    return G_SOURCE_CONTINUE;
   g_assert (MARKER_IS_EDITOR (editor));
   if (file) {
     g_autofree gchar *file_contents = NULL;
@@ -99,6 +105,7 @@ file_changed_cb (GFileMonitor      *monior,
 
     if (err)
     {
+      g_warning ("marker-editor: failed to reload changed file: %s", err->message);
       g_error_free (err);
     }
     else
@@ -119,9 +126,11 @@ file_changed_cb (GFileMonitor      *monior,
 
 static void
 buffer_changed_cb (GtkTextBuffer *buffer,
-                   gpointer user_data)
+                    gpointer user_data)
 {
   MarkerEditor *editor = user_data;
+  if (editor->disposing)
+    return;
   if (editor->view_mode != PREVIEW_ONLY_MODE) {
     editor->unsaved_changes = TRUE;
   }
@@ -274,7 +283,9 @@ editor_scroll_changed_cb (GtkAdjustment *adj,
                           gpointer       user_data)
 {
   MarkerEditor *editor = MARKER_EDITOR (user_data);
-  if (editor->view_mode != DUAL_PANE_MODE)
+  if (editor->disposing || editor->view_mode != DUAL_PANE_MODE)
+    return;
+  if (editor->syncing_scroll)
     return;
 
   gdouble value = gtk_adjustment_get_value (adj);
@@ -284,12 +295,42 @@ editor_scroll_changed_cb (GtkAdjustment *adj,
   if (upper <= page)
     return;
 
+  editor->syncing_scroll = TRUE;
   gdouble ratio = value / (upper - page);
   g_autofree gchar *script = g_strdup_printf (
     "window.scrollTo(0, (document.body.scrollHeight - window.innerHeight) * %f);",
     ratio);
   webkit_web_view_run_javascript (
     WEBKIT_WEB_VIEW (editor->preview), script, NULL, NULL, NULL);
+  editor->syncing_scroll = FALSE;
+}
+
+static void
+preview_scroll_changed_cb (GtkAdjustment *adj,
+                           gpointer       user_data)
+{
+  MarkerEditor *editor = MARKER_EDITOR (user_data);
+  if (editor->disposing || editor->view_mode != DUAL_PANE_MODE)
+    return;
+  if (editor->syncing_scroll)
+    return;
+
+  gdouble value = gtk_adjustment_get_value (adj);
+  gdouble upper = gtk_adjustment_get_upper (adj);
+  gdouble page = gtk_adjustment_get_page_size (adj);
+
+  if (upper <= page)
+    return;
+
+  editor->syncing_scroll = TRUE;
+  gdouble ratio = value / (upper - page);
+  GtkAdjustment *eadj = gtk_scrolled_window_get_vadjustment (editor->source_scroll);
+  gdouble eupper = gtk_adjustment_get_upper (eadj);
+  gdouble epage = gtk_adjustment_get_page_size (eadj);
+  if (eupper > epage) {
+    gtk_adjustment_set_value (eadj, ratio * (eupper - epage));
+  }
+  editor->syncing_scroll = FALSE;
 }
 
 static void
@@ -365,9 +406,14 @@ marker_editor_init (MarkerEditor *editor)
   gtk_widget_show (GTK_WIDGET (editor->source_scroll));
   gtk_container_add (GTK_CONTAINER (editor->source_scroll), GTK_WIDGET (editor->source_view));
 
-  /* Scroll sync: editor scroll → preview scroll (#22) */
+  /* Scroll sync: editor scroll ↔ preview scroll (#22) */
   GtkAdjustment *vadj = gtk_scrolled_window_get_vadjustment (editor->source_scroll);
   g_signal_connect (vadj, "value-changed", G_CALLBACK (editor_scroll_changed_cb), editor);
+
+  GtkAdjustment *pvadj = gtk_scrollable_get_vadjustment (GTK_SCROLLABLE (editor->preview));
+  if (pvadj) {
+    g_signal_connect (pvadj, "value-changed", G_CALLBACK (preview_scroll_changed_cb), editor);
+  }
 
   GtkTextBuffer *buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (editor->source_view));
   g_signal_connect (buffer, "changed", G_CALLBACK (buffer_changed_cb), editor);
@@ -379,11 +425,13 @@ marker_editor_init (MarkerEditor *editor)
   editor->view_mode = marker_prefs_get_default_view_mode ();
   editor->needs_refresh = FALSE;
   editor->zoom_level = marker_prefs_get_zoom_level ();
+  editor->syncing_scroll = FALSE;
 
   marker_editor_set_view_mode (editor, editor->view_mode);
   gtk_widget_show (GTK_WIDGET (editor));
 
-  editor->timer_id = g_timeout_add (20, refresh_timeout_cb, editor);
+  editor->timer_id = g_timeout_add (PREVIEW_REFRESH_MS, refresh_timeout_cb, editor);
+  editor->disposing = FALSE;
 
   marker_editor_apply_prefs (editor);
 }
@@ -392,6 +440,8 @@ static void
 marker_editor_dispose (GObject *object)
 {
   MarkerEditor *editor = MARKER_EDITOR (object);
+
+  editor->disposing = TRUE;
 
   /* Remove refresh timer to prevent use-after-free (#3) */
   if (editor->timer_id > 0) {
@@ -812,14 +862,15 @@ marker_editor_rename_file (MarkerEditor *editor,
                     parent,
                     name);
 
-    /** Delete old file **/
-    g_file_delete(editor->file,
-                  NULL,
-                  NULL);
+    /** Save to the new destination first, so the original is preserved on failure **/
+    GFile *old_file = g_object_ref (editor->file);
+    GFile *new_file = g_file_new_for_path (path);
+    marker_editor_save_file_as (editor, new_file);
 
-    /** Save file in new destination **/
-    GFile * file = g_file_new_for_path(path);
-    marker_editor_save_file_as(editor, file);
+    /** Remove the old file only after the new one has been written **/
+    g_file_delete (old_file, NULL, NULL);
+    g_object_unref (old_file);
+
     g_free(parent);
     g_free(path);
   }else {

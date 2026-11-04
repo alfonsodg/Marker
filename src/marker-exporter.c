@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include <glib/gi18n.h>
+#include <glib/gstdio.h>
 
 #include "marker.h"
 #include "marker-utils.h"
@@ -33,6 +34,10 @@
 #include "marker-editor.h"
 
 #include "marker-exporter.h"
+
+#define PDF_RENDER_WAIT_COLD_MS 8000
+#define PDF_RENDER_WAIT_WARM_MS 1500
+#define PDF_PRINT_WAIT_MS 3000
 
 MarkerExportFormat
 marker_exporter_str_to_fmt(const char* str)
@@ -70,45 +75,42 @@ marker_exporter_export_pandoc(const char*        markdown,
                               const char*        stylesheet_path,
                               const char*        outfile)
 {
-  const char* ftmp = ".marker_tmp_markdown.md";
-  char* path = g_path_get_dirname(outfile);
-  if (chdir(path) == 0)
-  {
-    FILE* fp = fopen(ftmp, "w");
-    if (fp)
-    {
-      fputs(markdown, fp);
-      fclose(fp);
+  g_autofree gchar *dir = g_path_get_dirname (outfile);
+  g_autofree gchar *tmpname = g_strdup_printf (".marker_tmp_%u.md", g_random_int ());
+  g_autofree gchar *tmppath = g_build_filename (dir, tmpname, NULL);
 
-      /* Use g_spawn_sync to avoid shell injection via filenames (#1) */
-      gchar *argv[] = {
-        "pandoc", "-s",
-        "-c", (gchar*)stylesheet_path,
-        "-o", (gchar*)outfile,
-        (gchar*)ftmp,
-        NULL
-      };
-
-      GError *error = NULL;
-      gint exit_status;
-      gboolean ok = g_spawn_sync(
-        NULL, argv, NULL,
-        G_SPAWN_SEARCH_PATH,
-        NULL, NULL, NULL, NULL,
-        &exit_status, &error);
-
-      if (!ok) {
-        g_warning("marker-exporter: pandoc spawn failed: %s", error->message);
-        g_error_free(error);
-      } else if (!g_spawn_check_exit_status(exit_status, &error)) {
-        g_warning("marker-exporter: pandoc exited with error: %s", error->message);
-        g_error_free(error);
-      }
-
-      remove(ftmp);
-    }
+  GError *error = NULL;
+  if (!g_file_set_contents (tmppath, markdown, -1, &error)) {
+    g_warning ("marker-exporter: cannot write temp file: %s", error->message);
+    g_error_free (error);
+    return;
   }
-  free(path);
+
+  /* Use g_spawn_sync to avoid shell injection via filenames (#1) */
+  gchar *argv[] = {
+    "pandoc", "-s",
+    "-c", (gchar*) stylesheet_path,
+    "-o", (gchar*) outfile,
+    (gchar*) tmppath,
+    NULL
+  };
+
+  gint exit_status;
+  gboolean ok = g_spawn_sync (
+    NULL, argv, NULL,
+    G_SPAWN_SEARCH_PATH,
+    NULL, NULL, NULL, NULL,
+    &exit_status, &error);
+
+  if (!ok) {
+    g_warning ("marker-exporter: pandoc spawn failed: %s", error->message);
+    g_error_free (error);
+  } else if (!g_spawn_check_exit_status (exit_status, &error)) {
+    g_warning ("marker-exporter: pandoc exited with error: %s", error->message);
+    g_error_free (error);
+  }
+
+  g_unlink (tmppath);
 }
 
 void
@@ -347,7 +349,7 @@ marker_exporter_export_with_preview (const gchar    *infile,
 
     /* Let WebKit load the HTML and run the Mermaid/highlight scripts */
     GMainLoop *loop = g_main_loop_new (NULL, FALSE);
-    g_timeout_add (own ? 8000 : 1500, marker_exporter_pdf_timeout_cb, loop);
+    g_timeout_add (own ? PDF_RENDER_WAIT_COLD_MS : PDF_RENDER_WAIT_WARM_MS, marker_exporter_pdf_timeout_cb, loop);
     g_main_loop_run (loop);
     g_main_loop_unref (loop);
 
@@ -355,7 +357,7 @@ marker_exporter_export_with_preview (const gchar    *infile,
 
     /* Let the print operation complete */
     loop = g_main_loop_new (NULL, FALSE);
-    g_timeout_add (3000, marker_exporter_pdf_timeout_cb, loop);
+    g_timeout_add (PDF_PRINT_WAIT_MS, marker_exporter_pdf_timeout_cb, loop);
     g_main_loop_run (loop);
     g_main_loop_unref (loop);
 

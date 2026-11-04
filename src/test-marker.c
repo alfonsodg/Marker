@@ -19,7 +19,7 @@ test_markdown_to_html_headings (void)
                                         NULL, -1);
   g_assert_nonnull (html);
   g_assert_true (strstr (html, "Hello") != NULL);
-  free (html);
+  g_free (html);
 }
 
 static void
@@ -31,7 +31,7 @@ test_markdown_to_html_code_block (void)
                                         NULL, -1);
   g_assert_nonnull (html);
   g_assert_true (strstr (html, "<code") != NULL);
-  free (html);
+  g_free (html);
 }
 
 static void
@@ -44,7 +44,7 @@ test_markdown_to_html_mermaid_block (void)
   g_assert_nonnull (html);
   /* Mermaid blocks should produce a div with class mermaid */
   g_assert_true (strstr (html, "mermaid") != NULL);
-  free (html);
+  g_free (html);
 }
 
 static void

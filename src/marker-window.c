@@ -67,6 +67,7 @@ struct _MarkerWindow
   guint                 editors_counter;
   guint                 untitled_files;
   gboolean              sidebar_visible;
+  gboolean              disposing;
 
   guint32               last_click_;
 };
@@ -463,7 +464,7 @@ rename_file_action_cb(GtkCellRendererText *cell,
                       gchar               *new_text,
                       gpointer             user_data)
 {
-  if (!new_text || sizeof(new_text) == 0)
+  if (!new_text || new_text[0] == '\0')
     return;
   MarkerWindow * window = MARKER_WINDOW(user_data);
   GtkTreeIter iter;
@@ -590,7 +591,7 @@ button_pressed_cb (GtkWidget *view,
 void
 marker_window_update_toc (MarkerWindow *window)
 {
-  if (!window->toc_store || !window->active_editor)
+  if (window->disposing || !window->toc_store || !window->active_editor)
     return;
 
   gtk_list_store_clear (window->toc_store);
@@ -828,6 +829,7 @@ marker_window_init (MarkerWindow *window)
   window->sidebar_visible = TRUE;
   window->editors_counter = 0;
   window->last_click_ = 0;
+  window->disposing = FALSE;
 
   GtkBuilder *builder = gtk_builder_new ();
 
@@ -1009,15 +1011,38 @@ marker_window_constructed (GObject *object)
 }
 
 static void
+marker_window_dispose (GObject *object)
+{
+  MarkerWindow *window = MARKER_WINDOW (object);
+  window->disposing = TRUE;
+  G_OBJECT_CLASS (marker_window_parent_class)->dispose (object);
+}
+
+static void
 marker_window_class_init (MarkerWindowClass *class)
 {
   G_OBJECT_CLASS (class)->constructed = marker_window_constructed;
+  G_OBJECT_CLASS (class)->dispose = marker_window_dispose;
 }
 
 
+static void
+toc_buffer_changed_cb (GtkTextBuffer *buffer,
+                        gpointer       data)
+{
+  MarkerWindow *window = MARKER_WINDOW (data);
+  if (window->disposing || window->active_editor == NULL)
+    return;
+  GtkTextBuffer *active_buf =
+    gtk_text_view_get_buffer (GTK_TEXT_VIEW (marker_editor_get_source_view (window->active_editor)));
+  if (active_buf != buffer)
+    return;
+  marker_window_update_toc (window);
+}
+
 void
 marker_window_add_editor(MarkerWindow *window,
-                         MarkerEditor *editor)
+                          MarkerEditor *editor)
 {
   window->active_editor = editor;
   gchar * name = g_strnfill(8,0);
@@ -1065,10 +1090,16 @@ marker_window_add_editor(MarkerWindow *window,
                    G_CALLBACK(subtitle_changed_cb),
                    window);
   g_signal_connect(marker_editor_get_preview(editor), "zoom-changed",
-                   G_CALLBACK(preview_zoom_changed_cb),
-                   window);
+                    G_CALLBACK(preview_zoom_changed_cb),
+                    window);
   preview_zoom_changed_cb(marker_editor_get_preview(editor),
-                          window);
+                           window);
+
+  /* Keep the TOC sidebar in sync while editing (#24) */
+  GtkTextBuffer *toc_buf =
+    gtk_text_view_get_buffer (GTK_TEXT_VIEW (marker_editor_get_source_view (editor)));
+  g_signal_connect (toc_buf, "changed",
+                    G_CALLBACK (toc_buffer_changed_cb), window);
   window->editors_counter ++;
 
   GtkWidget *source_view = GTK_WIDGET (marker_editor_get_source_view (editor));
