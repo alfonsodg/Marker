@@ -35,6 +35,28 @@
 #define MAX_ZOOM  4.0
 #define MIN_ZOOM  0.1
 
+#define SCROLL_HANDLER "marker_scroll"
+
+/* Reports the preview's vertical scroll position to the UI process so the
+ * editor can follow it. Runs as a user script, which WebKit executes even
+ * when page JavaScript is disabled. */
+static const gchar SCROLL_TRACKING_SCRIPT[] =
+  "(function () {"
+  "  var last = -1;"
+  "  function report() {"
+  "    var max = document.body.scrollHeight - window.innerHeight;"
+  "    if (max < 1) max = 1;"
+  "    var ratio = window.scrollY / max;"
+  "    if (ratio < 0) ratio = 0;"
+  "    else if (ratio > 1) ratio = 1;"
+  "    if (Math.abs(ratio - last) < 0.001) return;"
+  "    last = ratio;"
+  "    window.webkit.messageHandlers." SCROLL_HANDLER ".postMessage(ratio);"
+  "  }"
+  "  window.addEventListener('scroll', report, { passive: true });"
+  "  window.addEventListener('resize', report);"
+  "})();";
+
 #define SCROLL_STEP 25
 #define SCROLL_STEP_SCRIPT "window.scrollBy(%d,%d);"
 #define SCROLL_SCRIPT "window.scrollTo(%d,%d);"
@@ -292,6 +314,16 @@ marker_preview_set_zoom_level (MarkerPreview *preview,
 }
 
 static void
+scroll_message_cb (WebKitUserContentManager *manager,
+                   WebKitJavascriptResult   *result,
+                   gpointer                  user_data)
+{
+  JSCValue *value = webkit_javascript_result_get_js_value (result);
+  if (jsc_value_is_number (value))
+    g_signal_emit_by_name (user_data, "scroll-changed", jsc_value_to_double (value));
+}
+
+static void
 marker_preview_init (MarkerPreview *preview)
 {
   g_signal_connect (webkit_web_context_get_default (),
@@ -312,6 +344,12 @@ marker_preview_class_init (MarkerPreviewClass *class)
                  NULL, NULL, NULL, NULL,
                  G_TYPE_NONE, 0, NULL);
 
+  g_signal_new ("scroll-changed",
+                G_TYPE_FROM_CLASS (class),
+                G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE,
+                0, NULL, NULL, NULL,
+                G_TYPE_NONE, 1, G_TYPE_DOUBLE);
+
 
   WEBKIT_WEB_VIEW_CLASS(class)->load_changed = load_changed_cb;
 }
@@ -319,7 +357,21 @@ marker_preview_class_init (MarkerPreviewClass *class)
 MarkerPreview*
 marker_preview_new(void)
 {
-  MarkerPreview * obj =  g_object_new(MARKER_TYPE_PREVIEW, NULL);
+  WebKitUserContentManager *manager = webkit_user_content_manager_new ();
+  webkit_user_content_manager_register_script_message_handler (manager, SCROLL_HANDLER);
+  webkit_user_content_manager_add_script (manager, webkit_user_script_new (
+    SCROLL_TRACKING_SCRIPT,
+    WEBKIT_USER_CONTENT_INJECT_TOP_FRAME,
+    WEBKIT_USER_SCRIPT_INJECT_AT_DOCUMENT_END,
+    NULL, NULL));
+
+  MarkerPreview * obj = g_object_new (MARKER_TYPE_PREVIEW,
+                                      "user-content-manager", manager,
+                                      NULL);
+
+  g_signal_connect (manager, "script-message-received::" SCROLL_HANDLER,
+                    G_CALLBACK (scroll_message_cb), obj);
+  g_object_unref (manager);
 
   /* Restrict WebKit to prevent XSS from malicious Markdown (#2) */
   WebKitSettings *settings = webkit_web_view_get_settings(WEBKIT_WEB_VIEW(obj));
