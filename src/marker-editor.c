@@ -306,30 +306,28 @@ editor_scroll_changed_cb (GtkAdjustment *adj,
 }
 
 static void
-preview_scroll_changed_cb (GtkAdjustment *adj,
-                           gpointer       user_data)
+preview_scroll_changed_cb (MarkerPreview *preview,
+                           gdouble        ratio,
+                           MarkerEditor  *editor)
 {
-  MarkerEditor *editor = MARKER_EDITOR (user_data);
   if (editor->disposing || editor->view_mode != DUAL_PANE_MODE)
     return;
   if (editor->syncing_scroll)
     return;
 
-  gdouble value = gtk_adjustment_get_value (adj);
-  gdouble upper = gtk_adjustment_get_upper (adj);
-  gdouble page = gtk_adjustment_get_page_size (adj);
+  GtkAdjustment *eadj = gtk_scrolled_window_get_vadjustment (editor->source_scroll);
+  gdouble upper = gtk_adjustment_get_upper (eadj);
+  gdouble page = gtk_adjustment_get_page_size (eadj);
 
   if (upper <= page)
     return;
 
+  gdouble target = CLAMP (ratio, 0.0, 1.0) * (upper - page);
+  if (ABS (gtk_adjustment_get_value (eadj) - target) < 1.0)
+    return;
+
   editor->syncing_scroll = TRUE;
-  gdouble ratio = value / (upper - page);
-  GtkAdjustment *eadj = gtk_scrolled_window_get_vadjustment (editor->source_scroll);
-  gdouble eupper = gtk_adjustment_get_upper (eadj);
-  gdouble epage = gtk_adjustment_get_page_size (eadj);
-  if (eupper > epage) {
-    gtk_adjustment_set_value (eadj, ratio * (eupper - epage));
-  }
+  gtk_adjustment_set_value (eadj, target);
   editor->syncing_scroll = FALSE;
 }
 
@@ -410,10 +408,8 @@ marker_editor_init (MarkerEditor *editor)
   GtkAdjustment *vadj = gtk_scrolled_window_get_vadjustment (editor->source_scroll);
   g_signal_connect (vadj, "value-changed", G_CALLBACK (editor_scroll_changed_cb), editor);
 
-  GtkAdjustment *pvadj = gtk_scrollable_get_vadjustment (GTK_SCROLLABLE (editor->preview));
-  if (pvadj) {
-    g_signal_connect (pvadj, "value-changed", G_CALLBACK (preview_scroll_changed_cb), editor);
-  }
+  g_signal_connect (editor->preview, "scroll-changed",
+                    G_CALLBACK (preview_scroll_changed_cb), editor);
 
   GtkTextBuffer *buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (editor->source_view));
   g_signal_connect (buffer, "changed", G_CALLBACK (buffer_changed_cb), editor);
