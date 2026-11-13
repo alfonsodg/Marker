@@ -1,5 +1,5 @@
 {
-  "app-id": "com.github.fabiocolacio.marker",
+  "app-id": "io.github.alfonsodg.neomarker",
   "runtime": "org.gnome.Platform",
   "runtime-version": "3.30",
   "sdk": "org.gnome.Sdk",
@@ -65,14 +65,14 @@
         "buildsystem": "meson",
         "post-install": [
             "for size in 64 128; do
-              rsvg-convert -w $size -h $size -f png -o $size.png /app/share/icons/hicolor/scalable/apps/com.github.fabiocolacio.marker.svg
-              install -Dm644 $size.png /app/share/icons/hicolor/${size}x${size}/apps/com.github.fabiocolacio.marker.png
+              rsvg-convert -w $size -h $size -f png -o $size.png /app/share/icons/hicolor/scalable/apps/io.github.alfonsodg.neomarker.svg
+              install -Dm644 $size.png /app/share/icons/hicolor/${size}x${size}/apps/io.github.alfonsodg.neomarker.png
             done"
         ],
         "sources": [
           {
             "type": "git",
-            "url": "https://github.com/fabiocolacio/Marker.git"
+            "url": "https://github.com/alfonsodg/Marker.git"
           }
         ]
       }

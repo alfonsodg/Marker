@@ -19,7 +19,7 @@ export PATH="$HERE/usr/bin:$PATH"
 export LD_LIBRARY_PATH="$HERE/usr/lib:$LD_LIBRARY_PATH"
 export XDG_DATA_DIRS="$HERE/usr/share:$XDG_DATA_DIRS"
 export GI_TYPELIB_PATH="$HERE/usr/lib/girepository-1.0"
-exec "$HERE/usr/bin/marker" "$@"
+exec "$HERE/usr/bin/neomarker" "$@"
 EOF
 chmod +x "$APPDIR/AppRun"
 

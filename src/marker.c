@@ -31,7 +31,7 @@
 
 #include "marker.h"
 
-#define MARKER_PROJECT_URL "https://github.com/fabiocolacio/Marker"
+#define MARKER_PROJECT_URL "https://github.com/alfonsodg/Marker"
 
 GtkApplication* app;
 
@@ -95,7 +95,7 @@ marker_init(GtkApplication* app)
   if (gtk_application_prefers_app_menu(app))
   {
     GtkBuilder* builder =
-      gtk_builder_new_from_resource("/com/github/fabiocolacio/marker/ui/marker-appmenu.ui");
+      gtk_builder_new_from_resource("/io/github/alfonsodg/neomarker/ui/marker-appmenu.ui");
 
     GMenuModel* app_menu =
       G_MENU_MODEL(gtk_builder_get_object(builder, "app_menu"));
@@ -596,8 +596,8 @@ marker_about_cb(GSimpleAction* action,
 
   GtkAboutDialog* dialog = GTK_ABOUT_DIALOG(gtk_about_dialog_new());
 
-  gtk_about_dialog_set_logo_icon_name(dialog, "com.github.fabiocolacio.marker");
-  gtk_about_dialog_set_program_name(dialog, "Marker");
+  gtk_about_dialog_set_logo_icon_name(dialog, "io.github.alfonsodg.neomarker");
+  gtk_about_dialog_set_program_name(dialog, "NeoMarker");
   gtk_about_dialog_set_version(dialog, MARKER_VERSION);
   gtk_about_dialog_set_comments(dialog, _("A markdown editor for GNOME"));
   gtk_about_dialog_set_website(dialog, MARKER_PROJECT_URL);
@@ -630,7 +630,7 @@ marker_shortcuts_cb(GSimpleAction* action,
                     gpointer       user_data)
 {
   GtkBuilder* builder =
-    gtk_builder_new_from_resource("/com/github/fabiocolacio/marker/ui/marker-shortcuts-window.ui");
+    gtk_builder_new_from_resource("/io/github/alfonsodg/neomarker/ui/marker-shortcuts-window.ui");
 
   GtkWidget* dialog = GTK_WIDGET(gtk_builder_get_object(builder, "shortcuts"));
 
@@ -739,7 +739,7 @@ main(int    argc,
 
   gtk_source_init();
 
-  app = gtk_application_new("com.github.fabiocolacio.marker",
+  app = gtk_application_new("io.github.alfonsodg.neomarker",
                             G_APPLICATION_HANDLES_OPEN);
   g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
   g_signal_connect(app, "open", G_CALLBACK(marker_open), NULL);

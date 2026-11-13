@@ -1,8 +1,9 @@
 #!/bin/bash
-git clone https://github.com/fabiocolacio/marker
-cd marker
+set -euo pipefail
+git clone https://github.com/alfonsodg/Marker
+cd Marker || exit 1
 git submodule update --init --recursive
 rm -rf .git .gitignore .gitmodules
 cd ..
-zip -r marker.zip marker
-rm -rf marker
+zip -r neomarker.zip Marker
+rm -rf Marker

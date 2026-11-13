@@ -1,4 +1,4 @@
-app-id: com.github.fabiocolacio.marker
+app-id: io.github.alfonsodg.neomarker
 runtime: org.gnome.Platform
 runtime-version: '46'
 sdk: org.gnome.Sdk

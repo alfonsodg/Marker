@@ -840,7 +840,7 @@ marker_window_init (MarkerWindow *window)
   gtk_widget_show (GTK_WIDGET (vbox));
 
 
-  gtk_builder_add_from_resource (builder, "/com/github/fabiocolacio/marker/ui/marker-window-main-view.ui", NULL);
+  gtk_builder_add_from_resource (builder, "/io/github/alfonsodg/neomarker/ui/marker-window-main-view.ui", NULL);
 
   /** DOCUMENTS TREE **/
   GtkTreeView * documents_tree_view = GTK_TREE_VIEW(gtk_builder_get_object(builder, "documents_tree_view"));
@@ -924,7 +924,7 @@ marker_window_init (MarkerWindow *window)
   GtkBox *header_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   window->header_box = header_box;
   gtk_window_set_titlebar (GTK_WINDOW (window), GTK_WIDGET (header_box));
-  gtk_builder_add_from_resource (builder, "/com/github/fabiocolacio/marker/ui/marker-headerbar.ui", NULL);
+  gtk_builder_add_from_resource (builder, "/io/github/alfonsodg/neomarker/ui/marker-headerbar.ui", NULL);
   GtkHeaderBar *header_bar = GTK_HEADER_BAR (gtk_builder_get_object (builder, "header_bar"));
   window->header_bar = header_bar;
 
@@ -937,7 +937,7 @@ marker_window_init (MarkerWindow *window)
 
   /** Popover **/
   GtkMenuButton *menu_btn = GTK_MENU_BUTTON(gtk_builder_get_object(builder, "menu_btn"));
-  gtk_builder_add_from_resource (builder, "/com/github/fabiocolacio/marker/ui/marker-gear-popover.ui", NULL);
+  gtk_builder_add_from_resource (builder, "/io/github/alfonsodg/neomarker/ui/marker-gear-popover.ui", NULL);
   GtkWidget *popover = GTK_WIDGET (gtk_builder_get_object (builder, "gear_menu_popover"));
   window->zoom_original_btn = GTK_BUTTON (gtk_builder_get_object (builder, "zoom_original_btn"));
   gtk_menu_button_set_use_popover (menu_btn, TRUE);

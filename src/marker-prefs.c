@@ -753,7 +753,7 @@ marker_prefs_show_window()
 {
   GtkBuilder* builder =
     gtk_builder_new_from_resource(
-      "/com/github/fabiocolacio/marker/ui/marker-prefs-window.ui");
+      "/io/github/alfonsodg/neomarker/ui/marker-prefs-window.ui");
 
   GList *list = NULL;
   GtkComboBox* combo_box;
@@ -986,10 +986,10 @@ void
 marker_prefs_load()
 {
   prefs.editor_settings =
-    g_settings_new("com.github.fabiocolacio.marker.preferences.editor");
+    g_settings_new("io.github.alfonsodg.neomarker.preferences.editor");
   prefs.preview_settings =
-    g_settings_new("com.github.fabiocolacio.marker.preferences.preview");
+    g_settings_new("io.github.alfonsodg.neomarker.preferences.preview");
   prefs.window_settings =
-    g_settings_new("com.github.fabiocolacio.marker.preferences.window");
+    g_settings_new("io.github.alfonsodg.neomarker.preferences.window");
 }
 

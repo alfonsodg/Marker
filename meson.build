@@ -1,4 +1,4 @@
-project('Marker', 'c',
+project('NeoMarker', 'c',
   version : '2026.11.14',
   license : 'GPL3'
 )
@@ -6,7 +6,7 @@ project('Marker', 'c',
 PREFIX = get_option('prefix')
 DATA_DIR = join_paths(PREFIX, 'share')
 LIBS_DIR = join_paths(PREFIX, 'lib')
-APP_DIR = join_paths(DATA_DIR, 'com.github.fabiocolacio.marker')
+APP_DIR = join_paths(DATA_DIR, 'io.github.alfonsodg.neomarker')
 ICONS_DIR = join_paths(APP_DIR, 'icons')
 STYLES_DIR = join_paths(APP_DIR, 'styles')
 COMMON_DIR = join_paths(APP_DIR, 'common')
@@ -16,7 +16,7 @@ WEB_EXTENSIONS_DIRECTORY = join_paths(LIBS_DIR, 'Marker.extensions')
 APPDATA_DIR = join_paths(DATA_DIR, 'metainfo')
 LOCALE_DIR = join_paths(PREFIX, get_option('localedir'))
 
-EXECUTABLE_NAME = 'marker'
+EXECUTABLE_NAME = 'neomarker'
 
 gnome = import('gnome')
 
@@ -150,27 +150,27 @@ test_exe = executable(
 test('marker-tests', test_exe)
 
 install_data(
-  'data/com.github.fabiocolacio.marker.svg',
+  'data/io.github.alfonsodg.neomarker.svg',
   install_dir : join_paths(DATA_DIR, 'icons/hicolor/scalable/apps')
 )
 
 install_data(
-  'data/com.github.fabiocolacio.marker-symbolic.svg',
+  'data/io.github.alfonsodg.neomarker-symbolic.svg',
   install_dir : join_paths(DATA_DIR, 'icons/hicolor/symbolic/apps')
 )
 
 install_data(
-  'data/com.github.fabiocolacio.marker.desktop',
+  'data/io.github.alfonsodg.neomarker.desktop',
   install_dir : join_paths(DATA_DIR, 'applications')
 )
 
 install_data(
-  'data/com.github.fabiocolacio.marker.gschema.xml',
+  'data/io.github.alfonsodg.neomarker.gschema.xml',
   install_dir : join_paths(DATA_DIR, 'glib-2.0/schemas')
 )
 
 install_data(
-  'data/com.github.fabiocolacio.marker.appdata.xml',
+  'data/io.github.alfonsodg.neomarker.appdata.xml',
   install_dir : APPDATA_DIR
 )
 

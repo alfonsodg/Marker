@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2018-2020 Fabio Colacio <fabio.colacio.dev@gmail.com> -->
 <component type="desktop-application">
-  <id>com.github.fabiocolacio.marker.desktop</id>
+  <id>io.github.alfonsodg.neomarker.desktop</id>
   <metadata_license>FSFAP</metadata_license>
   <project_license>GPL-3.0</project_license>
-  <name>Marker</name>
+  <name>NeoMarker</name>
   <summary>Powerful markdown editor for the GNOME desktop.</summary>
 
   <description>
@@ -24,33 +24,33 @@
     </ul>
   </description>
 
-  <launchable type="desktop-id">com.github.fabiocolacio.marker.desktop</launchable>
+  <launchable type="desktop-id">io.github.alfonsodg.neomarker.desktop</launchable>
   <translation type="gettext">marker</translation>
 
   <screenshots>
     <screenshot type="default">
       <caption>The main view</caption>
-      <image>https://raw.githubusercontent.com/fabiocolacio/Marker/master/help/C/figures/scrot1.png</image>
+      <image>https://raw.githubusercontent.com/alfonsodg/Marker/master/help/C/figures/scrot1.png</image>
     </screenshot>
     <screenshot>
       <caption>Some plotting</caption>
-      <image>https://raw.githubusercontent.com/fabiocolacio/Marker/master/help/C/figures/scrot2.png</image>
+      <image>https://raw.githubusercontent.com/alfonsodg/Marker/master/help/C/figures/scrot2.png</image>
     </screenshot>
     <screenshot>
       <caption>The sketch editor</caption>
-      <image>https://raw.githubusercontent.com/fabiocolacio/Marker/master/help/C/figures/sketcher.png</image>
+      <image>https://raw.githubusercontent.com/alfonsodg/Marker/master/help/C/figures/sketcher.png</image>
     </screenshot>
   </screenshots>
 
   <developer_name>Fábio Colácio</developer_name>
-  <url type="homepage">https://github.com/fabiocolacio/Marker</url>
-  <url type="bugtracker">https://github.com/fabiocolacio/Marker/issues</url>
-  <url type="vcs-browser">https://github.com/fabiocolacio/Marker</url>
-  <url type="translate">https://github.com/fabiocolacio/Marker/tree/master/po</url>
+  <url type="homepage">https://github.com/alfonsodg/Marker</url>
+  <url type="bugtracker">https://github.com/alfonsodg/Marker/issues</url>
+  <url type="vcs-browser">https://github.com/alfonsodg/Marker</url>
+  <url type="translate">https://github.com/alfonsodg/Marker/tree/master/po</url>
 
   <provides>
     <binary>marker</binary>
-    <id>com.github.fabiocolacio.marker</id>
+    <id>io.github.alfonsodg.neomarker</id>
   </provides>
 
   <releases>
