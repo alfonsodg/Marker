@@ -44,7 +44,9 @@
     </screenshot>
   </screenshots>
 
-  <developer_name>Alfonso de la Guarda</developer_name>
+  <developer id="io.github.alfonsodg">
+    <name>Alfonso de la Guarda</name>
+  </developer>
   <url type="homepage">https://github.com/alfonsodg/NeoMarker</url>
   <url type="bugtracker">https://github.com/alfonsodg/NeoMarker/issues</url>
   <url type="vcs-browser">https://github.com/alfonsodg/NeoMarker</url>
@@ -56,6 +58,20 @@
   </provides>
 
   <releases>
+    <release version="2026.11.17" date="2026-11-17">
+      <description translate="no">
+        <p>First release under the NeoMarker name.</p>
+        <ul>
+          <li>Fork of Marker, maintaining the original under GPL-3.0</li>
+          <li>Mermaid 12.2.0 with GitHub's configuration; diagrams keep their proportions</li>
+          <li>Mermaid blocks highlighted inside the editor</li>
+          <li>Markdown syntax theme with a colour per construct</li>
+          <li>Formatting toolbar, labelled menu sections, view-mode selector</li>
+          <li>Quick PDF export, batch export, presentation (beamer) output</li>
+          <li>gtksourceview-4</li>
+        </ul>
+      </description>
+    </release>
     <release version="2020.04.04" date="2020-04-04">
       <description translate="no">
         <ul>
