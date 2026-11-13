@@ -14,10 +14,34 @@
     <property name="icon_name">document-export-symbolic</property>
     <property name="icon_size">2</property>
   </object>
+  <object class="GtkImage" id="new-document-image">
+    <property name="icon_name">document-new-symbolic</property>
+    <property name="icon_size">2</property>
+  </object>
+  <object class="GtkImage" id="find-image">
+    <property name="icon_name">edit-find-symbolic</property>
+    <property name="icon_size">2</property>
+  </object>
+  <object class="GtkImage" id="view-mode-image">
+    <property name="icon_name">view-dual-symbolic</property>
+    <property name="icon_size">2</property>
+  </object>
   
   <!-- Header Bar -->
   <object class="GtkHeaderBar" id="header_bar">
     <property name="visible">True</property>
+    <child>
+      <object class="GtkButton" id="new_btn">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="image">new-document-image</property>
+        <property name="tooltip_text" translatable="yes">New Document (Ctrl+N)</property>
+        <property name="action-name">win.neweditor</property>
+      </object>
+      <packing>
+        <property name="pack_type">start</property>
+      </packing>
+    </child>
     <child>
       <object class="GtkButton" id="open_btn">
         <property name="visible">True</property>
@@ -42,6 +66,30 @@
       <object class="GtkButton" id="unfullscreen_btn">
         <property name="visible">False</property>
         <property name="image">restore-view</property>
+      </object>
+      <packing>
+        <property name="pack_type">end</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkMenuButton" id="view_mode_btn">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="image">view-mode-image</property>
+        <property name="tooltip_text" translatable="yes">View Mode (Ctrl+1 to 4)</property>
+        <property name="direction">none</property>
+      </object>
+      <packing>
+        <property name="pack_type">end</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkButton" id="find_btn">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="image">find-image</property>
+        <property name="tooltip_text" translatable="yes">Find and Replace (Ctrl+F)</property>
+        <property name="action-name">win.find</property>
       </object>
       <packing>
         <property name="pack_type">end</property>

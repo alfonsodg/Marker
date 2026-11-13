@@ -950,6 +950,37 @@ marker_window_init (MarkerWindow *window)
   gtk_menu_button_set_popover (menu_btn, popover);
   gtk_menu_button_set_direction (menu_btn, GTK_ARROW_DOWN);
 
+  /* The header bar carries a view-mode button so the four modes are reachable
+     without the keyboard or the gear popover (#56). gtk_popover_menu_new has no
+     way to attach a menu model in GTK 3.24, so use the classic GtkMenu. */
+  {
+    GtkMenuButton *view_btn = GTK_MENU_BUTTON (gtk_builder_get_object (builder, "view_mode_btn"));
+
+    if (view_btn != NULL) {
+      GtkWidget *menu = gtk_menu_new ();
+
+      const struct {
+        const gchar *label;
+        const gchar *action;
+      } modes[] = {
+        { _("Editor Only"),  "win.editoronlymode" },
+        { _("Preview Only"), "win.previewonlymode" },
+        { _("Dual Pane"),    "win.dualpanemode" },
+        { _("Dual Window"),  "win.dualwindowmode" },
+      };
+
+      for (gsize i = 0; i < G_N_ELEMENTS (modes); i++) {
+        GtkWidget *item = gtk_menu_item_new_with_label (modes[i].label);
+        gtk_actionable_set_action_name (GTK_ACTIONABLE (item), modes[i].action);
+        gtk_widget_show (item);
+        gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+      }
+
+      gtk_menu_button_set_popup (view_btn, menu);
+      gtk_menu_button_set_direction (view_btn, GTK_ARROW_DOWN);
+    }
+  }
+
   /* The quick PDF export lives in the gear popover, so register its action
      and reveal the section unconditionally (#52). */
   {
