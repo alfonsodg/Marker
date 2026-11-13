@@ -265,7 +265,7 @@ replace_clicked_cb (GtkButton *button, MarkerEditor *editor)
   GtkTextBuffer *buffer = GTK_TEXT_BUFFER (gtk_source_search_context_get_buffer (ctx));
   GtkTextIter start, end;
   if (gtk_text_buffer_get_selection_bounds (buffer, &start, &end)) {
-    gtk_source_search_context_replace2 (ctx, &start, &end, replacement, -1, NULL);
+    gtk_source_search_context_replace (ctx, &start, &end, replacement, -1, NULL);
     search_next (GTK_ENTRY (editor->search_entry), editor);
   }
 }
