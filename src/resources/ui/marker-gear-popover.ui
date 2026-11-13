@@ -271,6 +271,22 @@
               </object>
             </child>
             <child>
+              <object class="GtkModelButton" id="sync_scroll_btn">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="text" translatable="yes">Scroll Sync</property>
+                <property name="action-name">win.sync-scroll</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkModelButton" id="dark_mode_btn">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="text" translatable="yes">Dark Mode</property>
+                <property name="action-name">win.darkmode</property>
+              </object>
+            </child>
+            <child>
               <object class="GtkModelButton" id="fullscreen_btn">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>

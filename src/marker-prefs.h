@@ -44,6 +44,8 @@ guint                marker_prefs_get_editor_pane_width          (void);
 void                 marker_prefs_set_editor_pane_width          (guint               width);
 gboolean             marker_prefs_get_show_sidebar               (void);
 void                 marker_prefs_set_show_sidebar               (gboolean            state);
+gboolean             marker_prefs_get_sync_scroll                (void);
+void                 marker_prefs_set_sync_scroll                (gboolean            state);
 char                *marker_prefs_get_syntax_theme               (void);
 void                 marker_prefs_set_syntax_theme               (const char         *theme);
 gboolean             marker_prefs_get_use_syntax_theme           (void);

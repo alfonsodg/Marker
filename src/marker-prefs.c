@@ -110,6 +110,18 @@ marker_prefs_set_show_sidebar(gboolean state)
 }
 
 gboolean
+marker_prefs_get_sync_scroll()
+{
+  return g_settings_get_boolean(prefs.window_settings, "sync-scroll");
+}
+
+void
+marker_prefs_set_sync_scroll(gboolean state)
+{
+  g_settings_set_boolean(prefs.window_settings, "sync-scroll", state);
+}
+
+gboolean
 marker_prefs_get_use_syntax_theme()
 {
   return g_settings_get_boolean(prefs.editor_settings, "enable-syntax-theme");

@@ -189,5 +189,11 @@
       <default>false</default>
       <summary>Whether the sidebar is shown</summary>
     </key>
+
+    <key name="sync-scroll" type="b">
+      <default>true</default>
+      <summary>Keep the preview scrolled with the editor</summary>
+      <description>Scroll the preview pane to follow the editor cursor position in dual-pane mode.</description>
+    </key>
   </schema>
 </schemalist>

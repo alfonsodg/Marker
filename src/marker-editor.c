@@ -285,7 +285,7 @@ editor_scroll_changed_cb (GtkAdjustment *adj,
   MarkerEditor *editor = MARKER_EDITOR (user_data);
   if (editor->disposing || editor->view_mode != DUAL_PANE_MODE)
     return;
-  if (editor->syncing_scroll)
+  if (editor->syncing_scroll || !marker_prefs_get_sync_scroll ())
     return;
 
   gdouble value = gtk_adjustment_get_value (adj);
@@ -302,34 +302,6 @@ editor_scroll_changed_cb (GtkAdjustment *adj,
     ratio);
   webkit_web_view_run_javascript (
     WEBKIT_WEB_VIEW (editor->preview), script, NULL, NULL, NULL);
-  editor->syncing_scroll = FALSE;
-}
-
-static void
-preview_scroll_changed_cb (GtkAdjustment *adj,
-                           gpointer       user_data)
-{
-  MarkerEditor *editor = MARKER_EDITOR (user_data);
-  if (editor->disposing || editor->view_mode != DUAL_PANE_MODE)
-    return;
-  if (editor->syncing_scroll)
-    return;
-
-  gdouble value = gtk_adjustment_get_value (adj);
-  gdouble upper = gtk_adjustment_get_upper (adj);
-  gdouble page = gtk_adjustment_get_page_size (adj);
-
-  if (upper <= page)
-    return;
-
-  editor->syncing_scroll = TRUE;
-  gdouble ratio = value / (upper - page);
-  GtkAdjustment *eadj = gtk_scrolled_window_get_vadjustment (editor->source_scroll);
-  gdouble eupper = gtk_adjustment_get_upper (eadj);
-  gdouble epage = gtk_adjustment_get_page_size (eadj);
-  if (eupper > epage) {
-    gtk_adjustment_set_value (eadj, ratio * (eupper - epage));
-  }
   editor->syncing_scroll = FALSE;
 }
 
@@ -406,14 +378,11 @@ marker_editor_init (MarkerEditor *editor)
   gtk_widget_show (GTK_WIDGET (editor->source_scroll));
   gtk_container_add (GTK_CONTAINER (editor->source_scroll), GTK_WIDGET (editor->source_view));
 
-  /* Scroll sync: editor scroll ↔ preview scroll (#22) */
+  /* Scroll sync: editor scroll drives the preview. WebKitWebView is not a
+     GtkScrollable, so the reverse direction is not wired here; the previous
+     attempt cast it and failed at runtime. */
   GtkAdjustment *vadj = gtk_scrolled_window_get_vadjustment (editor->source_scroll);
   g_signal_connect (vadj, "value-changed", G_CALLBACK (editor_scroll_changed_cb), editor);
-
-  GtkAdjustment *pvadj = gtk_scrollable_get_vadjustment (GTK_SCROLLABLE (editor->preview));
-  if (pvadj) {
-    g_signal_connect (pvadj, "value-changed", G_CALLBACK (preview_scroll_changed_cb), editor);
-  }
 
   GtkTextBuffer *buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (editor->source_view));
   g_signal_connect (buffer, "changed", G_CALLBACK (buffer_changed_cb), editor);

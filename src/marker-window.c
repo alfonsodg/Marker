@@ -168,6 +168,33 @@ action_fullscreen (GSimpleAction *action,
 }
 
 static void
+action_sync_scroll (GSimpleAction *action,
+                    GVariant      *value,
+                    gpointer       user_data)
+{
+  gboolean state = g_variant_get_boolean (value);
+
+  g_simple_action_set_state (action, value);
+  marker_prefs_set_sync_scroll (state);
+}
+
+static void
+action_dark_mode (GSimpleAction *action,
+                  GVariant      *value,
+                  gpointer       user_data)
+{
+  gboolean state = g_variant_get_boolean (value);
+
+  g_simple_action_set_state (action, value);
+  marker_prefs_set_use_dark_theme (state);
+  g_object_set (gtk_settings_get_default (),
+                "gtk-application-prefer-dark-theme", state, NULL);
+
+  MarkerWindow *window = MARKER_WINDOW (user_data);
+  marker_window_refresh_all_preview (window);
+}
+
+static void
 action_sidebar (GSimpleAction *action,
                 GVariant      *value,
                 gpointer       window)
@@ -825,6 +852,18 @@ marker_window_init (MarkerWindow *window)
     const gchar *sidebar_accels[] =  { "F12", NULL };
     gtk_application_set_accels_for_action (app, "win.sidebar", sidebar_accels);
     g_action_map_add_action (G_ACTION_MAP (window), action);
+
+    /* Quick toggles for behaviour that previously had no control (#57). Their
+       initial state mirrors the stored preferences. */
+    action = G_ACTION (g_simple_action_new_stateful ("sync-scroll", NULL,
+                                                     g_variant_new_boolean (marker_prefs_get_sync_scroll ())));
+    g_signal_connect (G_SIMPLE_ACTION (action), "change-state", G_CALLBACK (action_sync_scroll), window);
+    g_action_map_add_action (G_ACTION_MAP (window), action);
+
+    action = G_ACTION (g_simple_action_new_stateful ("darkmode", NULL,
+                                                     g_variant_new_boolean (marker_prefs_get_use_dark_theme ())));
+    g_signal_connect (G_SIMPLE_ACTION (action), "change-state", G_CALLBACK (action_dark_mode), window);
+    g_action_map_add_action (G_ACTION_MAP (window), action);
   }
 
   /** Add marker icon theme to the default icon theme **/
@@ -954,9 +993,10 @@ marker_window_init (MarkerWindow *window)
      without the keyboard or the gear popover (#56). gtk_popover_menu_new has no
      way to attach a menu model in GTK 3.24, so use the classic GtkMenu. */
   {
-    GtkMenuButton *view_btn = GTK_MENU_BUTTON (gtk_builder_get_object (builder, "view_mode_btn"));
+    GtkWidget *view_widget = GTK_WIDGET (gtk_builder_get_object (builder, "view_mode_btn"));
 
-    if (view_btn != NULL) {
+    if (GTK_IS_MENU_BUTTON (view_widget)) {
+      GtkMenuButton *view_btn = GTK_MENU_BUTTON (view_widget);
       GtkWidget *menu = gtk_menu_new ();
 
       const struct {
