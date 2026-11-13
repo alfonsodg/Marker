@@ -1,5 +1,5 @@
 project('NeoMarker', 'c',
-  version : '2026.11.16',
+  version : '2026.11.17',
   license : 'GPL3'
 )
 
