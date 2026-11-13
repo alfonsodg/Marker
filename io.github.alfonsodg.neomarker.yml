@@ -19,12 +19,19 @@ cleanup:
   - /share/vala
 
 modules:
+  - name: intltool
+    buildsystem: autotools
+    sources:
+      - type: archive
+        url: https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz
+        sha256: 67c74d94196b153b774ab9f89b2fa6c6ba79352407037c8c14d5aeb334e959cd
+
   - name: gtkspell3
     buildsystem: autotools
     sources:
       - type: archive
         url: https://sourceforge.net/projects/gtkspell/files/3.0.10/gtkspell3-3.0.10.tar.xz
-        sha256: b040f63836b347eb344f5571e2a7c5c28da0a3e7a3e97c8df1740d2806a3e7f0
+        sha256: b040f63836b347eb344f5542443dc254621805072f7141d49c067ecb5a375732
 
   - name: gtksourceview4
     buildsystem: meson
@@ -35,19 +42,27 @@ modules:
 
   - name: neomarker
     buildsystem: meson
+    build-options:
+      # The bundled submodules are provided as separate sources below; stop git
+      # from trying to fetch them and from copying .git dirs over each other.
+      env:
+        GIT_CONFIG_GLOBAL: /dev/null
     sources:
       - type: git
         url: https://github.com/alfonsodg/NeoMarker.git
         tag: v2026.11.17
         commit: 2093b54cad97a6cd3f383b9ae00b46e9630a6d13
+        disable-submodules: true
       - type: git
         url: https://github.com/Mandarancio/scidown.git
         commit: a7b7f063de4f272ef0ec12d00b98470888e8cb32
         dest: src/scidown
+        disable-submodules: true
       - type: git
         url: https://github.com/Mandarancio/charter.git
         commit: a25dee1214ea9ba5882325066555cb813efbb489
         dest: src/scidown/src/charter
+        disable-submodules: true
       - type: git
         url: https://github.com/codeplea/tinyexpr.git
         commit: 9476568b69de4c384903f1d5f255907b92592f45
