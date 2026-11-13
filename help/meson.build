@@ -11,9 +11,8 @@ gnome.yelp(
   ],
   media: [
   	'figures/icon.png',
-  	'figures/scrot.png',
-  	'figures/scrot1.png',
-  	'figures/scrot2.png',
+  	'figures/neomarker-editor.png',
+  	'figures/neomarker-diagrams.png',
   	'figures/sketcher.png'
   ]
 )

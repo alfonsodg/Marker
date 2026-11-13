@@ -19,7 +19,7 @@
     <title>KaTeX</title>
     <p>Add beautiful math formulas to your markdown documents using KaTeX:</p>
     <p>Mathematic formulas can be written, in the syntax of the LaTeX language, between two <code>$$</code> tags.</p>
-    <media type="image" mime="image/png" height="400" src="figures/scrot1.png">
+    <media type="image" mime="image/png" height="400" src="figures/neomarker-editor.png">
       <!--This is the alt text, as read out by screen readers and if the image is
       missing. It also describes how to re-create the image.-->
       <p>Math fomulas rendered by KaTeX.</p>
@@ -29,7 +29,7 @@
   <section id="charter">
     <title>Charter</title>
     <p>Create line graphs, bar graphs, or scatter plots in your documents using Charter.</p>
-    <media type="image" mime="image/png" height="400" src="figures/scrot2.png">
+    <media type="image" mime="image/png" height="400" src="figures/neomarker-diagrams.png">
       <!--This is the alt text, as read out by screen readers and if the image is
       missing. It also describes how to re-create the image.-->
       <p>Graph rendering using Charter.</p>

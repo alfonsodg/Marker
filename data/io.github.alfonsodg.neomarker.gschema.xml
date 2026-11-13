@@ -20,7 +20,7 @@
 
   <schema path="/io/github/alfonsodg/neomarker/preferences/editor/" id="io.github.alfonsodg.neomarker.preferences.editor">
     <key name="syntax-theme" type="s">
-      <default>'solarized-light'</default>
+      <default>'kate'</default>
       <summary>Syntax Theme</summary>
       <description>The syntax theme to use for the editor.</description>
     </key>
