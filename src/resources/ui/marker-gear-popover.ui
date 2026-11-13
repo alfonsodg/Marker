@@ -6,8 +6,9 @@
         <property name="visible">True</property>
         <property name="orientation">vertical</property>
         <property name="margin">8</property>
+
+        <!-- Zoom Controls -->
         <child>
-          <!-- Zoom Controls -->
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="orientation">horizontal</property>
@@ -68,6 +69,9 @@
             </child>
           </object>
         </child>
+
+        <!-- File section. The id is used by marker-window.c to register the
+             application actions, so it must stay. -->
         <child>
           <object class="GtkBox" id="appmenu_popover_items_start">
             <property name="visible">False</property>
@@ -82,7 +86,20 @@
               </object>
             </child>
             <child>
-              <object class="GtkModelButton">
+              <object class="GtkLabel" id="file_section_label">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">File</property>
+                <property name="xalign">0</property>
+                <property name="margin-top">2</property>
+                <property name="margin-bottom">2</property>
+                <style>
+                  <class name="dim-label"/>
+                  <class name="caption"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkModelButton" id="new_window_btn">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="text" translatable="yes">New Window</property>
@@ -90,51 +107,11 @@
               </object>
             </child>
             <child>
-              <object class="GtkModelButton">
+              <object class="GtkModelButton" id="open_new_window_btn">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="text" translatable="yes">Export as PDF (same name)</property>
-                <property name="action-name">app.export-pdf</property>
-              </object>
-            </child>
-          </object>
-        </child>
-        <child>
-          <!-- Gear Menu Entries -->
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="orientation">vertical</property>
-            <child>
-              <object class="GtkSeparator">
-                <property name="visible">True</property>
-                <property name="orientation">horizontal</property>
-                <property name="margin-top">6</property>
-                <property name="margin-bottom">6</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkModelButton" id="fullscreen_btn">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="text" translatable="yes">Fullscreen</property>
-                <property name="action-name">win.fullscreen</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkModelButton" id="sidebar_btn">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="text" translatable="yes">Sidebar</property>
-                <property name="action-name">win.sidebar</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkSeparator">
-                <property name="visible">True</property>
-                <property name="orientation">horizontal</property>
-                <property name="margin-top">6</property>
-                <property name="margin-bottom">6</property>
+                <property name="text" translatable="yes">Open in New Window…</property>
+                <property name="action-name">win.opennew</property>
               </object>
             </child>
             <child>
@@ -149,8 +126,16 @@
               <object class="GtkModelButton" id="export_btn">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="text" translatable="yes">Export…</property>
+                <property name="text" translatable="yes">Export with Format Choice…</property>
                 <property name="action-name">win.export</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkModelButton" id="quick_pdf_btn">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="text" translatable="yes">Quick PDF Beside the File</property>
+                <property name="action-name">app.export-pdf</property>
               </object>
             </child>
             <child>
@@ -161,6 +146,15 @@
                 <property name="action-name">win.print</property>
               </object>
             </child>
+          </object>
+        </child>
+
+        <!-- Edit section -->
+        <child>
+          <object class="GtkBox" id="edit_section_box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
             <child>
               <object class="GtkSeparator">
                 <property name="visible">True</property>
@@ -170,15 +164,125 @@
               </object>
             </child>
             <child>
-              <object class="GtkModelButton">
+              <object class="GtkLabel" id="edit_section_label">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Edit</property>
+                <property name="xalign">0</property>
+                <property name="margin-top">2</property>
+                <property name="margin-bottom">2</property>
+                <style>
+                  <class name="dim-label"/>
+                  <class name="caption"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkModelButton" id="find_btn">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="text" translatable="yes">Find and Replace…</property>
+                <property name="action-name">win.find</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkModelButton" id="insert_table_btn">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="text" translatable="yes">Insert Table</property>
+                <property name="action-name">win.table</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkModelButton" id="insert_mermaid_btn">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="text" translatable="yes">Insert Mermaid Diagram</property>
+                <property name="action-name">win.mermaid</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkModelButton" id="insert_link_btn">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="text" translatable="yes">Insert Link</property>
+                <property name="action-name">win.link</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkModelButton" id="sketcher_btn">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="text" translatable="yes">Open Sketcher</property>
+                <property name="action-name">win.sketcher</property>
+              </object>
+            </child>
+          </object>
+        </child>
+
+        <!-- View section -->
+        <child>
+          <object class="GtkBox" id="view_section_box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkSeparator">
+                <property name="visible">True</property>
+                <property name="orientation">horizontal</property>
+                <property name="margin-top">6</property>
+                <property name="margin-bottom">6</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="view_section_label">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">View</property>
+                <property name="xalign">0</property>
+                <property name="margin-top">2</property>
+                <property name="margin-bottom">2</property>
+                <style>
+                  <class name="dim-label"/>
+                  <class name="caption"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkModelButton" id="view_mode_btn">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="text" translatable="yes">View Mode</property>
                 <property name="menu-name">view</property>
               </object>
             </child>
+            <child>
+              <object class="GtkModelButton" id="sidebar_btn">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="text" translatable="yes">Outline Sidebar</property>
+                <property name="action-name">win.sidebar</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkModelButton" id="refresh_btn">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="text" translatable="yes">Refresh Preview</property>
+                <property name="action-name">win.refresh</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkModelButton" id="fullscreen_btn">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="text" translatable="yes">Fullscreen</property>
+                <property name="action-name">win.fullscreen</property>
+              </object>
+            </child>
           </object>
         </child>
+
+        <!-- Application section. The id is used by marker-window.c when the
+             desktop has no app menu, so it must stay. -->
         <child>
           <object class="GtkBox" id="appmenu_popover_items_end">
             <property name="visible">False</property>
@@ -190,6 +294,19 @@
                 <property name="orientation">horizontal</property>
                 <property name="margin-top">6</property>
                 <property name="margin-bottom">6</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="app_section_label">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Application</property>
+                <property name="xalign">0</property>
+                <property name="margin-top">2</property>
+                <property name="margin-bottom">2</property>
+                <style>
+                  <class name="dim-label"/>
+                  <class name="caption"/>
+                </style>
               </object>
             </child>
             <child>
@@ -220,16 +337,25 @@
               <object class="GtkModelButton">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="text" translatable="yes">About Marker</property>
+                <property name="text" translatable="yes">About NeoMarker</property>
                 <property name="action-name">app.about</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkModelButton">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="text" translatable="yes">Quit</property>
+                <property name="action-name">app.quit</property>
               </object>
             </child>
           </object>
         </child>
       </object>
     </child>
+
+    <!-- View Mode submenu -->
     <child>
-      <!-- View Submenu -->
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
