@@ -31,27 +31,27 @@
   <style name="draw-spaces"                 foreground="#d0d7de"/>
 
   <!-- Markdown constructs. Markdown uses these names, not the def: aliases. -->
-  <style name="header"                      foreground="heading" bold="true"/>
+  <style name="markdown:header"                      foreground="heading" bold="true"/>
   <style name="header1"                     foreground="heading" bold="true" scale="1.6"/>
   <style name="header2"                     foreground="heading" bold="true" scale="1.4"/>
   <style name="header3"                     foreground="heading" bold="true" scale="1.25"/>
   <style name="header4"                     foreground="heading" bold="true" scale="1.15"/>
   <style name="header5"                     foreground="heading" bold="true"/>
   <style name="header6"                     foreground="heading" bold="true"/>
-  <style name="list-marker"                 foreground="list" bold="true"/>
-  <style name="blockquote-marker"           foreground="quote" bold="true"/>
-  <style name="emphasis"                    italic="true" foreground="#8250df"/>
-  <style name="strong-emphasis"             bold="true" foreground="#1f2328"/>
-  <style name="code-span"                   foreground="#cf222e" background="code-bg"/>
-  <style name="code-block"                  foreground="fg" background="code-bg"/>
-  <style name="link-text"                   foreground="link" underline="single"/>
-  <style name="url"                         foreground="link"/>
-  <style name="label"                       foreground="link"/>
-  <style name="image-marker"                foreground="list"/>
-  <style name="attribute-value"             foreground="string"/>
-  <style name="backslash-escape"            foreground="number" bold="true"/>
-  <style name="horizontal-rule"             foreground="muted" bold="true"/>
-  <style name="line-break"                  foreground="muted"/>
+  <style name="markdown:list-marker"                 foreground="list" bold="true"/>
+  <style name="markdown:blockquote-marker"           foreground="quote" bold="true"/>
+  <style name="markdown:emphasis"                    italic="true" foreground="#8250df"/>
+  <style name="markdown:strong-emphasis"             bold="true" foreground="#1f2328"/>
+  <style name="markdown:code-span"                   foreground="#cf222e" background="code-bg"/>
+  <style name="markdown:code-block"                  foreground="fg" background="code-bg"/>
+  <style name="markdown:link-text"                   foreground="link" underline="single"/>
+  <style name="markdown:url"                         foreground="link"/>
+  <style name="markdown:label"                       foreground="link"/>
+  <style name="markdown:image-marker"                foreground="list"/>
+  <style name="markdown:attribute-value"             foreground="string"/>
+  <style name="markdown:backslash-escape"            foreground="number" bold="true"/>
+  <style name="markdown:horizontal-rule"             foreground="muted" bold="true"/>
+  <style name="markdown:line-break"                  foreground="muted"/>
   <style name="preformatted-section"        foreground="fg"/>
   <style name="reference"                   foreground="link"/>
   <style name="email"                       foreground="link" underline="single"/>
