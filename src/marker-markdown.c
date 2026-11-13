@@ -116,7 +116,7 @@ char* html_header(MarkerMathJSMode    mathjs_mode,
       mermaid_script = g_strdup(" ");
       break;
     case MERMAID_NET:
-      mermaid_script = g_strdup("<script src=\"https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js\"></script>");
+      mermaid_script = g_strdup("<script src=\"https://cdn.jsdelivr.net/npm/mermaid@12.2.0/dist/mermaid.min.js\"></script>");
       break;
     case MERMAID_LOCAL:
       mermaid_script = g_strdup_printf("<script src=\"file://%smermaid/mermaid.min.js\"></script>", SCRIPTS_DIR);
@@ -187,7 +187,12 @@ html_footer(MarkerMathJSMode     mathjs_mode,
       mermaid_render = g_strdup(" ");
       break;
     default:
-      mermaid_render = g_strdup("<script>mermaid.initialize({startOnLoad:true, useMaxWidth:true, flowchart:{useMaxWidth:true,padding:15,nodeSpacing:30,rankSpacing:40}, sequence:{useMaxWidth:true,boxMargin:4}, er:{useMaxWidth:true}, journey:{useMaxWidth:true}, gantt:{useMaxWidth:true}, pie:{useMaxWidth:true}, mindmap:{useMaxWidth:true}, state:{useMaxWidth:true}, class:{useMaxWidth:true}});</script>");
+      /* Mirror the configuration GitHub uses for its own Mermaid rendering,
+         read from their mermaidMarkdown bundle: theme redux-color, look neo,
+         useMaxWidth true, wrappingWidth 120. Any deviation (useMaxWidth:false,
+         a larger wrappingWidth, the default theme) changes the layout and is
+         what made these diagrams render wide and flat here (#54). */
+      mermaid_render = g_strdup("<script>mermaid.initialize({startOnLoad:true, theme:'redux-color', look:'neo', flowchart:{useMaxWidth:true,padding:15,nodeSpacing:50,rankSpacing:50,wrappingWidth:120,minNodeWidth:120}, sequence:{useMaxWidth:true,boxMargin:4,wrap:true}, er:{useMaxWidth:true}, journey:{useMaxWidth:true}, gantt:{useMaxWidth:true}, pie:{useMaxWidth:true}, mindmap:{useMaxWidth:true}, state:{useMaxWidth:true,wrap:true}, class:{useMaxWidth:true}});</script>");
       break;
   }
 
@@ -209,13 +214,23 @@ html_footer(MarkerMathJSMode     mathjs_mode,
     "100:'💯',sparkles:'✨',boom:'💥',bomb:'💣',poop:'💩',"
     "ghost:'👻',skull:'💀',alien:'👽',robot:'🤖',"
     "white_check_mark:'✅',ballot_box_with_check:'☑️'};"
-    "var b=document.body.innerHTML;"
-    "Object.keys(m).forEach(function(k){b=b.replace(new RegExp(':'+k+':','g'),m[k]);});"
-    "document.body.innerHTML=b;"
+    /* Replace shortcodes in text nodes only. Reassigning document.body.innerHTML
+       re-serialised and re-parsed the whole page, which rewrote the .mermaid
+       source (dropping the raw <br/>) and forced Mermaid to lay the graph out
+       again wide and flat (#54). */
+    "var re=new RegExp(':('+Object.keys(m).join('|')+ '):','g');"
+    "var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null);"
+    "var nodes=[];while(w.nextNode())nodes.push(w.currentNode);"
+    "nodes.forEach(function(n){"
+    "if(n.nodeValue&&n.nodeValue.indexOf(':')>=0&&n.nodeValue.match(re))n.nodeValue=n.nodeValue.replace(re,function(_,k){return m[k];});"
+    "});"
     "document.querySelectorAll('.mermaid').forEach(function(d){"
     "var prev=d.previousElementSibling;"
     "if(prev&&(prev.tagName==='H2'||prev.tagName==='H3'))prev.classList.add('diagram-title');"
     "});"
+    /* Mermaid sizes its own SVGs (useMaxWidth is on, as on GitHub). Do not
+       resize them here: overriding width breaks the viewBox ratio and the
+       label layout Mermaid computed (#54). */
     /* Group heading + next element to prevent page break between them */
     "document.querySelectorAll('h2,h3,h4').forEach(function(h){"
     "var next=h.nextElementSibling;"
