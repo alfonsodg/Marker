@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<style-scheme id="neomarker" _name="NeoMarker" version="1.0">
+  <author>Alfonso de la Guarda</author>
+  <description>Light theme tuned for Markdown: every construct gets its own colour.</description>
+
+  <color name="bg"           value="#ffffff"/>
+  <color name="fg"           value="#24292f"/>
+  <color name="muted"        value="#6a737d"/>
+  <color name="comment"      value="#6a737d"/>
+  <color name="heading"      value="#0550ae"/>
+  <color name="keyword"      value="#cf222e"/>
+  <color name="string"       value="#0a7d4f"/>
+  <color name="number"       value="#953800"/>
+  <color name="function"     value="#6639ba"/>
+  <color name="type"         value="#0550ae"/>
+  <color name="link"         value="#0969da"/>
+  <color name="list"         value="#bf3989"/>
+  <color name="quote"        value="#57606a"/>
+  <color name="accent-soft"  value="#ddf4ff"/>
+  <color name="code-bg"      value="#f6f8fa"/>
+  <color name="selection-bg" value="#b6d7ff"/>
+
+  <style name="text"                        foreground="fg" background="bg"/>
+  <style name="cursor"                      foreground="fg"/>
+  <style name="selection"                   background="selection-bg"/>
+  <style name="current-line"                background="#f6f8fa"/>
+  <style name="line-numbers"                foreground="muted" background="#fafbfc"/>
+  <style name="bracket-match"               background="#ffdf5d"/>
+  <style name="search-match"                background="#fff8c5"/>
+  <style name="right-margin"                foreground="#d0d7de"/>
+  <style name="draw-spaces"                 foreground="#d0d7de"/>
+
+  <!-- Markdown constructs. Markdown uses these names, not the def: aliases. -->
+  <style name="header"                      foreground="heading" bold="true"/>
+  <style name="header1"                     foreground="heading" bold="true" scale="1.6"/>
+  <style name="header2"                     foreground="heading" bold="true" scale="1.4"/>
+  <style name="header3"                     foreground="heading" bold="true" scale="1.25"/>
+  <style name="header4"                     foreground="heading" bold="true" scale="1.15"/>
+  <style name="header5"                     foreground="heading" bold="true"/>
+  <style name="header6"                     foreground="heading" bold="true"/>
+  <style name="list-marker"                 foreground="list" bold="true"/>
+  <style name="blockquote-marker"           foreground="quote" bold="true"/>
+  <style name="emphasis"                    italic="true" foreground="#8250df"/>
+  <style name="strong-emphasis"             bold="true" foreground="#1f2328"/>
+  <style name="code-span"                   foreground="#cf222e" background="code-bg"/>
+  <style name="code-block"                  foreground="fg" background="code-bg"/>
+  <style name="link-text"                   foreground="link" underline="single"/>
+  <style name="url"                         foreground="link"/>
+  <style name="label"                       foreground="link"/>
+  <style name="image-marker"                foreground="list"/>
+  <style name="attribute-value"             foreground="string"/>
+  <style name="backslash-escape"            foreground="number" bold="true"/>
+  <style name="horizontal-rule"             foreground="muted" bold="true"/>
+  <style name="line-break"                  foreground="muted"/>
+  <style name="preformatted-section"        foreground="fg"/>
+  <style name="reference"                   foreground="link"/>
+  <style name="email"                       foreground="link" underline="single"/>
+  <style name="sub-literal"                 foreground="number"/>
+  <style name="super-literal"               foreground="number"/>
+
+  <!-- Generic symbols for embedded code blocks -->
+  <style name="def:comment"                 foreground="comment" italic="true"/>
+  <style name="def:shebang"                 foreground="comment" bold="true"/>
+  <style name="def:doc-comment"             foreground="comment" italic="true"/>
+  <style name="def:doc-comment-element"     foreground="type"/>
+  <style name="def:keyword"                 foreground="keyword" bold="true"/>
+  <style name="def:statement"               foreground="keyword" bold="true"/>
+  <style name="def:type"                    foreground="type"/>
+  <style name="def:builtin"                 foreground="type"/>
+  <style name="def:identifier"              foreground="fg"/>
+  <style name="def:function"                foreground="function"/>
+  <style name="def:string"                  foreground="string"/>
+  <style name="def:character"               foreground="string"/>
+  <style name="def:special-char"            foreground="number"/>
+  <style name="def:constant"                foreground="number"/>
+  <style name="def:decimal"                 foreground="number"/>
+  <style name="def:base-n-integer"          foreground="number"/>
+  <style name="def:floating-point"          foreground="number"/>
+  <style name="def:complex"                 foreground="number"/>
+  <style name="def:operator"                foreground="keyword"/>
+  <style name="def:preprocessor"            foreground="function"/>
+  <style name="def:note"                    foreground="keyword" bold="true" background="#fff8c5"/>
+  <style name="def:error"                   foreground="#cf222e" underline="single"/>
+  <style name="def:warning"                 foreground="#953800" underline="single"/>
+  <style name="def:insertion"               foreground="#0a7d4f" background="#dafbe1"/>
+  <style name="def:deletion"                foreground="#cf222e" background="#ffebe9"/>
+</style-scheme>

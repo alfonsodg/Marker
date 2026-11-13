@@ -160,8 +160,25 @@ marker_source_view_set_syntax_theme(MarkerSourceView* source_view,
   GtkTextBuffer* buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(source_view));
   GtkSourceStyleSchemeManager* style_manager =
     gtk_source_style_scheme_manager_get_default();
+
+  /* The bundled schemes (data/styles) live outside GTK's own search path, so
+     add it once before asking for the scheme. */
+  static gboolean search_path_added = FALSE;
+
+  if (!search_path_added) {
+    gtk_source_style_scheme_manager_append_search_path (style_manager, STYLES_DIR);
+    gtk_source_style_scheme_manager_force_rescan (style_manager);
+    search_path_added = TRUE;
+  }
+
   GtkSourceStyleScheme* scheme =
     gtk_source_style_scheme_manager_get_scheme(style_manager, theme);
+
+  if (scheme == NULL) {
+    g_warning ("marker: syntax theme '%s' not found, falling back", theme);
+    scheme = gtk_source_style_scheme_manager_get_scheme (style_manager, "classic");
+  }
+
   gtk_source_buffer_set_style_scheme(GTK_SOURCE_BUFFER(buffer), scheme);
 }
 
