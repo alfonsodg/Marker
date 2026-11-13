@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  mermaid.lang — syntax highlighting for Mermaid diagrams in GtkSourceView 4
+
+  Highlights the diagram type, keywords, node shapes, edge operators, edge
+  labels and comments of every Mermaid diagram family. Works on .mmd and
+  .mermaid files and is embedded in Markdown fences by markdown.lang.
+
+  This file is part of NeoMarker, distributed under the GNU General Public
+  License v3.
+-->
+<language id="mermaid" name="Mermaid" version="2.0" _section="Other">
+  <metadata>
+    <property name="mimetypes">text/x-mermaid</property>
+    <property name="globs">*.mmd;*.mermaid</property>
+    <property name="line-comment-start">%%</property>
+  </metadata>
+
+  <styles>
+    <style id="directive"    name="Diagram type"    map-to="def:keyword"/>
+    <style id="keyword"      name="Keyword"         map-to="def:keyword"/>
+    <style id="node-id"      name="Node id"         map-to="def:identifier"/>
+    <style id="edge"         name="Edge"            map-to="def:operator"/>
+    <style id="edge-label"   name="Edge label"      map-to="def:constant"/>
+    <style id="arrow-head"   name="Arrow head"      map-to="def:special-char"/>
+    <style id="comment"      name="Comment"         map-to="def:comment"/>
+    <style id="style-call"   name="Style directive" map-to="def:preprocessor"/>
+    <style id="shape"        name="Shape delimiter" map-to="def:special-char"/>
+    <style id="number"       name="Number"          map-to="def:decimal"/>
+    <style id="quoted"       name="Quoted text"     map-to="def:string"/>
+    <style id="actor"        name="Actor"           map-to="def:identifier"/>
+    <style id="message"      name="Message"         map-to="def:string"/>
+  </styles>
+
+  <definitions>
+    <define-regex id="diagram-type">\b(flowchart|graph|sequenceDiagram|classDiagram|stateDiagram(?:-v2)?|erDiagram|journey|gantt|pie|quadrantChart|requirementDiagram|gitGraph|C4Context|C4Container|C4Component|C4Dynamic|C4Deployment|mindmap|timeline|sankey-beta|xychart-beta|block-beta|packet-beta|kanban|architecture-beta|radar-beta|treemap-beta|zenuml|info)\b</define-regex>
+
+    <context id="mermaid">
+      <include>
+        <context id="comment" style-ref="comment" end-at-line-end="true">
+          <start>%%</start>
+        </context>
+
+        <context id="directive-line" style-ref="directive">
+          <match>^\s*(\%{diagram-type})(.*)$</match>
+        </context>
+
+        <context id="keyword-line" style-ref="keyword">
+          <match>^\s*(subgraph|end|participant|actor|note|loop|alt|else|opt|par|and|rect|critical|break|activate|deactivate|autonumber|title|section)\b.*$</match>
+        </context>
+
+        <context id="style-line" style-ref="style-call">
+          <match>^\s*(style|classDef|class|linkStyle|click)\b.*$</match>
+        </context>
+
+        <context id="sequence-line" style-ref="message">
+          <match>^\s*[A-Za-z_][A-Za-z0-9_-]*\s*(-{1,2}&gt;&gt;|&lt;&lt;-{1,2}|-{2,3}x|-{1,2}\)).*$</match>
+        </context>
+
+        <context id="quoted" style-ref="quoted">
+          <start>"</start>
+          <end>"</end>
+        </context>
+
+        <context id="pipe-label" style-ref="edge-label">
+          <start>\|</start>
+          <end>\|</end>
+        </context>
+
+        <context id="shape-delimiters" style-ref="shape">
+          <match>[\[\]\(\)\{\}]</match>
+        </context>
+
+        <context id="arrow" style-ref="arrow-head">
+          <match>(-{2,}|={2,}|-\.-?)(&gt;|x|o)</match>
+        </context>
+
+        <context id="number" style-ref="number">
+          <match>\b[0-9]+(\.[0-9]+)?\b</match>
+        </context>
+
+        <context id="identifier" style-ref="node-id">
+          <match>\b[A-Za-z_][A-Za-z0-9_-]*\b</match>
+        </context>
+      </include>
+    </context>
+  </definitions>
+</language>

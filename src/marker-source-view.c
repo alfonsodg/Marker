@@ -244,6 +244,35 @@ marker_source_view_set_language(MarkerSourceView* source_view,
     GtkSourceLanguageManager* manager =
       gtk_source_language_manager_get_default();
 
+    /* Bundled language specs (data/language-specs) are not in GTK's search
+       path, so add the directory once. GtkSourceLanguageManager has no
+       append variant, hence rebuilding the path list. */
+    static gboolean search_path_added = FALSE;
+
+    if (!search_path_added) {
+      const gchar * const *old_path = gtk_source_language_manager_get_search_path (manager);
+      GPtrArray *paths = g_ptr_array_new_with_free_func (g_free);
+      gboolean already_there = FALSE;
+
+      for (gint i = 0; old_path != NULL && old_path[i] != NULL; i++) {
+        if (g_strcmp0 (old_path[i], LANGS_DIR) == 0)
+          already_there = TRUE;
+      }
+
+      if (!already_there) {
+        g_ptr_array_add (paths, g_strdup (LANGS_DIR));
+
+        for (gint i = 0; old_path != NULL && old_path[i] != NULL; i++)
+          g_ptr_array_add (paths, g_strdup (old_path[i]));
+
+        g_ptr_array_add (paths, NULL);
+        gtk_source_language_manager_set_search_path (manager, (gchar **) paths->pdata);
+      }
+
+      g_ptr_array_unref (paths);
+      search_path_added = TRUE;
+    }
+
     GtkSourceLanguage* language =
       gtk_source_language_manager_get_language(manager, language_name);
 

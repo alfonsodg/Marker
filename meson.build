@@ -9,6 +9,7 @@ LIBS_DIR = join_paths(PREFIX, 'lib')
 APP_DIR = join_paths(DATA_DIR, 'io.github.alfonsodg.neomarker')
 ICONS_DIR = join_paths(APP_DIR, 'icons')
 STYLES_DIR = join_paths(APP_DIR, 'styles')
+LANGS_DIR = join_paths(APP_DIR, 'language-specs')
 COMMON_DIR = join_paths(APP_DIR, 'common')
 SCRIPTS_DIR = join_paths(APP_DIR, 'scripts')
 HIGHLIGHT_STYLES_DIR = join_paths(join_paths(SCRIPTS_DIR, 'highlight'),'styles')
@@ -92,6 +93,7 @@ ext_deps =[
 
 add_global_arguments(
   '-DSTYLES_DIR="@0@/"'.format(STYLES_DIR),
+  '-DLANGS_DIR="@0@"'.format(LANGS_DIR),
   '-DSCRIPTS_DIR="@0@/"'.format(SCRIPTS_DIR),
   '-DICONS_DIR="@0@/"'.format(ICONS_DIR),
   '-DHIGHLIGHT_STYLES_DIR="@0@/"'.format(HIGHLIGHT_STYLES_DIR),
@@ -191,6 +193,11 @@ install_subdir(
 
 install_subdir(
   'data/icons',
+  install_dir : APP_DIR
+)
+
+install_subdir(
+  'data/language-specs',
   install_dir : APP_DIR
 )
 
