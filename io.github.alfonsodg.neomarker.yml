@@ -1,6 +1,6 @@
 app-id: io.github.alfonsodg.neomarker
 runtime: org.gnome.Platform
-runtime-version: '46'
+runtime-version: '50'
 sdk: org.gnome.Sdk
 command: neomarker
 
@@ -10,15 +10,30 @@ finish-args:
   - --socket=wayland
   - --device=dri
   - --filesystem=home
+  - --metadata=X-DConf=migrate-path=/io/github/alfonsodg/neomarker/
 
 cleanup:
   - /include
   - /lib/pkgconfig
+  - /share/pkgconfig
+  - /share/aclocal
   - /share/gtk-doc
   - /share/man
   - /share/vala
+  - '*.la'
+  - '*.a'
 
 modules:
+  - name: enchant
+    buildsystem: autotools
+    config-opts:
+      - --disable-static
+      - --with-myspell-dir=/usr/share/hunspell
+    sources:
+      - type: archive
+        url: https://github.com/rrthomas/enchant/releases/download/v2.8.12/enchant-2.8.12.tar.gz
+        sha256: 20e5fab2ca0f95ba9d1ef5052fe5b028e3e1d66d4cdea6b9adfcbd3e524c2a09
+
   - name: intltool
     buildsystem: autotools
     sources:
