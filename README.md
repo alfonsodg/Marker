@@ -1,12 +1,23 @@
 # ![NeoMarker](data/io.github.alfonsodg.neomarker.svg) NeoMarker
 
-Enhanced fork of [Marker](https://github.com/fabiocolacio/Marker) — a markdown editor
-for Linux made with GTK+-3.0.
+A markdown editor for Linux made with GTK+-3.0. **NeoMarker is a fork of
+[Marker](https://github.com/fabiocolacio/Marker)**, the original project by
+[Fabio Colacio](https://github.com/fabiocolacio/Marker), and continues its
+development independently.
+
+Marker is distributed under the [GNU General Public License v3](LICENSE.md).
+NeoMarker inherits that licence and every derivative work keeps the same terms;
+the original copyright notice is preserved in every source file.
 
 This fork adds security fixes, modern JS libraries, powerful CLI export,
-dark mode, and more.
+dark mode, and a reworked interface.
 
 [![Build](https://github.com/alfonsodg/NeoMarker/actions/workflows/build.yml/badge.svg)](https://github.com/alfonsodg/NeoMarker/actions/workflows/build.yml)
+
+> **Note** — NeoMarker is not affiliated with or endorsed by the Marker
+> project. Bug reports about NeoMarker belong in
+> [this repository](https://github.com/alfonsodg/NeoMarker/issues), not in
+> upstream Marker.
 
 ## What's New (vs upstream)
 
@@ -181,9 +192,21 @@ neomarker document.md -w    # dual window
 | Ctrl+Shift+N | New window |
 | Ctrl+Q | Quit |
 
-## Credits
+## Credits and licence
 
-- Original project: [Fabio Colacio](https://github.com/fabiocolacio/Marker)
-- Enhanced fork: [Alfonso de la Guarda](https://github.com/alfonsodg/NeoMarker)
-- Markdown engine: [scidown](https://github.com/Mandarancio/scidown/) by Martino
+NeoMarker exists because of [Marker](https://github.com/fabiocolacio/Marker):
+
+- **Original project**: [Marker](https://github.com/fabiocolacio/Marker) by
+  [Fabio Colacio](https://github.com/fabiocolacio), licensed under the
+  [GNU General Public License v3](LICENSE.md)
+- **Markdown engine**: [scidown](https://github.com/Mandarancio/scidown/) by
+  Martino Ferrari
+- **Plots**: [charter](https://github.com/Mandarancio/charter/) by Martino
   Ferrari
+- **This fork**: [Alfonso de la Guarda](https://github.com/alfonsodg)
+
+The GPL v3 requires derivative works to stay under the same licence and to
+preserve the original notices. NeoMarker therefore keeps the original
+copyright headers in every source file it inherited, states its origin in this
+README and in the About dialog, and publishes all of its own source code under
+the same terms.

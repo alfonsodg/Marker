@@ -599,10 +599,15 @@ marker_about_cb(GSimpleAction* action,
   gtk_about_dialog_set_logo_icon_name(dialog, "io.github.alfonsodg.neomarker");
   gtk_about_dialog_set_program_name(dialog, "NeoMarker");
   gtk_about_dialog_set_version(dialog, MARKER_VERSION);
-  gtk_about_dialog_set_comments(dialog, _("A markdown editor for GNOME"));
+  gtk_about_dialog_set_comments(dialog,
+    _("A markdown editor for GNOME.\n\n"
+      "NeoMarker is a fork of Marker by Fabio Colacio, "
+      "distributed under the GNU General Public License v3."));
   gtk_about_dialog_set_website(dialog, MARKER_PROJECT_URL);
   gtk_about_dialog_set_website_label(dialog, _("Report bugs and ideas on github"));
-  gtk_about_dialog_set_copyright(dialog, "Copyright 2017-2018 Fabio Colacio");
+  gtk_about_dialog_set_copyright(dialog,
+    "Copyright 2017-2018 Fabio Colacio (Marker)\n"
+    "Copyright 2024-2026 Alfonso de la Guarda (NeoMarker)");
   gtk_about_dialog_set_license_type(dialog, GTK_LICENSE_GPL_3_0);
   gtk_about_dialog_set_authors(dialog, authors);
   gtk_about_dialog_set_artists(dialog, artists);

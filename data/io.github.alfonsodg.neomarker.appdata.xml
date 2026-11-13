@@ -8,6 +8,8 @@
   <summary>Powerful markdown editor for the GNOME desktop.</summary>
 
   <description>
+    <p>NeoMarker is a fork of Marker, the markdown editor by Fabio Colacio,
+    continuing its development under the GNU General Public License v3.</p>
     <p>Features:</p>
     <ul>
       <li>View and edit markdown documents</li>
@@ -42,14 +44,14 @@
     </screenshot>
   </screenshots>
 
-  <developer_name>Fábio Colácio</developer_name>
+  <developer_name>Alfonso de la Guarda</developer_name>
   <url type="homepage">https://github.com/alfonsodg/NeoMarker</url>
   <url type="bugtracker">https://github.com/alfonsodg/NeoMarker/issues</url>
   <url type="vcs-browser">https://github.com/alfonsodg/NeoMarker</url>
   <url type="translate">https://github.com/alfonsodg/NeoMarker/tree/master/po</url>
 
   <provides>
-    <binary>marker</binary>
+    <binary>neomarker</binary>
     <id>io.github.alfonsodg.neomarker</id>
   </provides>
 
