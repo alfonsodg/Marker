@@ -784,6 +784,12 @@ marker_window_init (MarkerWindow *window)
     gtk_application_set_accels_for_action (app, "win.open", open_accels);
     g_action_map_add_action (G_ACTION_MAP (window), action);
 
+    action = G_ACTION (g_simple_action_new ("opennew", NULL));
+    g_signal_connect_swapped (G_SIMPLE_ACTION (action), "activate", G_CALLBACK (marker_window_open_file_in_new_window), window);
+    const gchar *opennew_accels[] = { "<Shift><Ctrl>o", NULL };
+    gtk_application_set_accels_for_action (app, "win.opennew", opennew_accels);
+    g_action_map_add_action (G_ACTION_MAP (window), action);
+
     action = G_ACTION (g_simple_action_new ("save", NULL));
     g_signal_connect_swapped (G_SIMPLE_ACTION (action), "activate", G_CALLBACK (marker_window_save_active_file), window);
     const gchar *save_accels[] = { "<Ctrl>s", NULL };
