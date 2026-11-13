@@ -2,12 +2,22 @@ app-id: io.github.alfonsodg.neomarker
 runtime: org.gnome.Platform
 runtime-version: '46'
 sdk: org.gnome.Sdk
-command: marker
+command: neomarker
+
 finish-args:
   - --share=ipc
   - --socket=fallback-x11
   - --socket=wayland
+  - --device=dri
   - --filesystem=home
+
+cleanup:
+  - /include
+  - /lib/pkgconfig
+  - /share/gtk-doc
+  - /share/man
+  - /share/vala
+
 modules:
   - name: gtkspell3
     buildsystem: autotools
@@ -23,18 +33,22 @@ modules:
         url: https://download.gnome.org/sources/gtksourceview/4.8/gtksourceview-4.8.4.tar.xz
         sha256: 7ec9d18fb283d1f84a3a3eff3b7a72b09a10c9c006597b3fbabbb5958420a87d
 
-  - name: marker
+  - name: neomarker
     buildsystem: meson
     sources:
       - type: git
         url: https://github.com/alfonsodg/NeoMarker.git
-        branch: master
+        tag: v2026.11.17
+        commit: 2093b54cad97a6cd3f383b9ae00b46e9630a6d13
       - type: git
         url: https://github.com/Mandarancio/scidown.git
+        commit: a7b7f063de4f272ef0ec12d00b98470888e8cb32
         dest: src/scidown
       - type: git
         url: https://github.com/Mandarancio/charter.git
+        commit: a25dee1214ea9ba5882325066555cb813efbb489
         dest: src/scidown/src/charter
       - type: git
         url: https://github.com/codeplea/tinyexpr.git
+        commit: 9476568b69de4c384903f1d5f255907b92592f45
         dest: src/scidown/src/charter/src/tinyexpr
