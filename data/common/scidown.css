@@ -210,6 +210,12 @@ img {
   padding: 10px;
   border: 1px solid #e0e0e0;
   background: #fafafa;
+  /* Centre the diagram horizontally, as GitHub does. A diagram narrower than
+     the pane was pinned to the left edge and looked off-balance (#54). */
+  display: flex;
+  justify-content: center;
+  align-content: flex-start;
+  height: fit-content;
 }
 
 /* useMaxWidth is on (as on GitHub), so Mermaid already sizes the SVG to its
@@ -218,6 +224,7 @@ img {
    Never add min-height: it breaks the viewBox ratio. */
 .mermaid svg {
   display: block;
+  margin: 0 auto;
   max-width: 100%;
   height: auto;
 }
@@ -417,6 +424,7 @@ tr:nth-child(even) {
     max-width: 180mm;
     height: auto;
     max-height: 240mm;
+    margin: 0 auto;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
