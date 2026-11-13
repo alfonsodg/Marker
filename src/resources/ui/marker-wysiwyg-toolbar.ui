@@ -7,51 +7,54 @@
     <property name="can_focus">False</property>
     <property name="icon_name">format-text-bold-symbolic</property>
   </object>
-  <object class="GtkImage" id="image-icon">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">insert-image-symbolic</property>
-  </object>
   <object class="GtkImage" id="italic-icon">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="icon_name">format-text-italic-symbolic</property>
+  </object>
+  <object class="GtkImage" id="monospace-icon">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">format-text-plaintext-symbolic</property>
   </object>
   <object class="GtkImage" id="link-icon">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="icon_name">insert-link-symbolic</property>
   </object>
+  <object class="GtkImage" id="table-icon">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">view-grid-symbolic</property>
+  </object>
+  <object class="GtkImage" id="mermaid-icon">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">x-office-drawing-symbolic</property>
+  </object>
   <object class="GtkImage" id="sketcher-icon">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="icon_name">insert-object-symbolic</property>
   </object>
-  <object class="GtkImage" id="strikethrough-icon">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">format-text-strikethrough-symbolic</property>
-  </object>
-  <object class="GtkImage" id="underline-icon">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">format-text-underline-symbolic</property>
-  </object>
-  <object class="GtkHeaderBar" id="wysiwyg_toolbar">
+  <object class="GtkBox" id="wysiwyg_toolbar">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="hexpand">False</property>
     <property name="vexpand">False</property>
+    <property name="spacing">12</property>
     <child>
       <object class="GtkBox" id="format">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
-          <object class="GtkButton">
+          <object class="GtkButton" id="wysiwyg_bold_btn">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="image">bold-icon</property>
+            <property name="tooltip_text" translatable="yes">Bold (Ctrl+B)</property>
+            <property name="action-name">win.bold</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -60,11 +63,13 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton">
+          <object class="GtkButton" id="wysiwyg_italic_btn">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="image">italic-icon</property>
+            <property name="tooltip_text" translatable="yes">Italic (Ctrl+I)</property>
+            <property name="action-name">win.italic</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -73,29 +78,18 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton">
+          <object class="GtkButton" id="wysiwyg_monospace_btn">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="image">underline-icon</property>
+            <property name="image">monospace-icon</property>
+            <property name="tooltip_text" translatable="yes">Monospace (Ctrl+M)</property>
+            <property name="action-name">win.monospace</property>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="image">strikethrough-icon</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
           </packing>
         </child>
         <style>
@@ -108,11 +102,13 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
-          <object class="GtkButton">
+          <object class="GtkButton" id="wysiwyg_link_btn">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="image">link-icon</property>
+            <property name="tooltip_text" translatable="yes">Insert Link (Ctrl+K)</property>
+            <property name="action-name">win.link</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -121,11 +117,13 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton">
+          <object class="GtkButton" id="wysiwyg_table_btn">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="image">image-icon</property>
+            <property name="image">table-icon</property>
+            <property name="tooltip_text" translatable="yes">Insert Table (Ctrl+T)</property>
+            <property name="action-name">win.table</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -134,16 +132,33 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton">
+          <object class="GtkButton" id="wysiwyg_mermaid_btn">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="image">sketcher-icon</property>
+            <property name="image">mermaid-icon</property>
+            <property name="tooltip_text" translatable="yes">Insert Mermaid Diagram (Ctrl+Shift+M)</property>
+            <property name="action-name">win.mermaid</property>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="wysiwyg_sketcher_btn">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image">sketcher-icon</property>
+            <property name="tooltip_text" translatable="yes">Open Sketcher (Ctrl+D)</property>
+            <property name="action-name">win.sketcher</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <style>

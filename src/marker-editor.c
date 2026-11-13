@@ -363,6 +363,24 @@ marker_editor_init (MarkerEditor *editor)
                    editor);
   /** DONE **/
 
+  /* Formatting toolbar. It was shipping in the resource bundle but nothing ever
+     instantiated it (#59). It sits above the paned area so it applies to the
+     active document regardless of the view mode. */
+  {
+    GtkBuilder *tb = gtk_builder_new ();
+
+    if (gtk_builder_add_from_resource (tb,
+          "/io/github/alfonsodg/neomarker/ui/marker-wysiwyg-toolbar.ui", NULL)) {
+      GtkWidget *toolbar = GTK_WIDGET (gtk_builder_get_object (tb, "wysiwyg_toolbar"));
+
+      if (toolbar != NULL) {
+        gtk_box_pack_start (editor->vbox, toolbar, FALSE, TRUE, 0);
+        gtk_widget_show_all (toolbar);
+      }
+    }
+    g_object_unref (tb);
+  }
+
   gtk_paned_set_position (editor->paned, 450);
   gtk_widget_show (GTK_WIDGET (editor->paned));
   gtk_box_pack_start (GTK_BOX (editor), GTK_WIDGET (editor->paned), TRUE, TRUE, 0);
