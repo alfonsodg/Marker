@@ -5,14 +5,49 @@ A markdown editor for Linux made with GTK+-3.0. **NeoMarker is a fork of
 [Fabio Colacio](https://github.com/fabiocolacio/Marker), and continues its
 development independently.
 
+NeoMarker exists because Marker development has stalled: upstream sees only
+occasional commits, its Flathub package still builds against gtksourceview-3 and
+needs network access to load Mermaid from a CDN. This fork keeps the editor
+working on current distributions and fixes what broke.
+
+[![Build](https://github.com/alfonsodg/NeoMarker/actions/workflows/build.yml/badge.svg)](https://github.com/alfonsodg/NeoMarker/actions/workflows/build.yml)
+
+## Install
+
+```bash
+# Arch Linux
+yay -S neomarker-bin     # prebuilt
+yay -S neomarker-git     # from source
+```
+
+Any distribution:
+
+```bash
+# Self-contained AppImage — no dependencies needed
+chmod +x NeoMarker-x86_64.AppImage && ./NeoMarker-x86_64.AppImage
+```
+
+Both come from the [latest release](https://github.com/alfonsodg/NeoMarker/releases/latest).
+
+## What it gives you over upstream
+
+- **Works today**: gtksourceview-4, no obsolete dependencies
+- **Mermaid 12.2** configured like GitHub, so diagrams wrap their labels instead
+  of stretching into a flat strip, plus a palette that separates containers from
+  nodes in both the preview and the PDF
+- **Mermaid highlighted inside the editor**, not just in the preview
+- **Markdown syntax theme** with a colour per construct: headings, emphasis,
+  inline code, links, list markers, quotes
+- **Formatting toolbar**, labelled menu sections and a view-mode selector
+- **Quick PDF** (`Ctrl+E`), batch export, merged output and beamer presentation
+- **Security fixes**: shell injection removed from the export path, XSS
+  restricted in the preview
+- **No network permission needed**: Mermaid, KaTeX and highlight.js ship with the
+  app instead of loading from a CDN
+
 Marker is distributed under the [GNU General Public License v3](LICENSE.md).
 NeoMarker inherits that licence and every derivative work keeps the same terms;
 the original copyright notice is preserved in every source file.
-
-This fork adds security fixes, modern JS libraries, powerful CLI export,
-dark mode, and a reworked interface.
-
-[![Build](https://github.com/alfonsodg/NeoMarker/actions/workflows/build.yml/badge.svg)](https://github.com/alfonsodg/NeoMarker/actions/workflows/build.yml)
 
 > **Note** — NeoMarker is not affiliated with or endorsed by the Marker
 > project. Bug reports about NeoMarker belong in
