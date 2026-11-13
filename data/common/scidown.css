@@ -203,7 +203,7 @@ img {
   }
 }
 
-/* === SCREEN: diagram fills the preview width === */
+/* === SCREEN: Mermaid renders with GitHub's own configuration === */
 .mermaid {
   width: 100%;
   margin: 8px 0;
@@ -212,10 +212,89 @@ img {
   background: #fafafa;
 }
 
+/* useMaxWidth is on (as on GitHub), so Mermaid already sizes the SVG to its
+   container. Forcing white-space, max-width or width here overrides Mermaid's
+   label measurement and is what flattened these diagrams before (#54).
+   Never add min-height: it breaks the viewBox ratio. */
 .mermaid svg {
-  width: 100% !important;
-  height: auto !important;
+  display: block;
   max-width: 100%;
+  height: auto;
+}
+
+/* The redux-color theme with look:neo paints every node white, which leaves the
+   diagrams washed out on a white page. Tint them so the structure reads at a
+   glance (#54).
+
+   The palette separates the two structural roles by hue, not by shade: grouping
+   boxes are warm (yellow/amber) and the nodes inside them are cool (pink). A
+   single blue family made a node and its container indistinguishable, which is
+   what made the default layout confusing.
+
+   Screen and print both get this palette, so the exported PDF matches what is
+   seen in the preview. */
+@media screen, print {
+  /* Keep the tints in the PDF: without this WebKit drops backgrounds when
+     printing and every shape comes out white again. */
+  .mermaid,
+  .mermaid svg,
+  .mermaid g.node,
+  .mermaid g.cluster {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Container: warm, low saturation so it reads as background. */
+  .mermaid .cluster rect {
+    fill: #fff8e1 !important;
+    stroke: #e0b34d !important;
+  }
+
+  .mermaid .cluster span,
+  .mermaid .cluster .nodeLabel {
+    color: #8a6100 !important;
+  }
+
+  /* Node: cool pink, clearly distinct from the cluster behind it. */
+  .mermaid .node rect,
+  .mermaid .node path,
+  .mermaid .node polygon,
+  .mermaid .node circle {
+    fill: #fde7f0 !important;
+    stroke: #c2185b !important;
+    stroke-width: 1.6px !important;
+  }
+
+  .mermaid .nodeLabel,
+  .mermaid .node text {
+    color: #5c0f2e !important;
+    fill: #5c0f2e !important;
+  }
+
+  /* Edges: dark neutral, readable over both tints. */
+  .mermaid .edgePath path,
+  .mermaid path.flowchart-link {
+    stroke: #4a4453 !important;
+    stroke-width: 1.6px !important;
+  }
+
+  .mermaid .edgeLabel rect,
+  .mermaid .edgeLabel .labelBkg {
+    fill: #f3f1f6 !important;
+    opacity: 1 !important;
+  }
+
+  .mermaid .edgeLabel span,
+  .mermaid .edgeLabel div,
+  .mermaid .edgeLabel p {
+    color: #3d3747 !important;
+    background: transparent !important;
+  }
+
+  .mermaid .marker {
+    fill: #4a4453 !important;
+    stroke: #4a4453 !important;
+  }
 }
 
 h3 {
@@ -322,12 +401,24 @@ tr:nth-child(even) {
     margin-bottom: 2mm;
   }
 
+  /* Fit inside the page without distorting the aspect ratio */
   .mermaid {
-    width: 190mm;
-    height: 250mm;
-    overflow: hidden;
+    width: auto;
+    max-width: 190mm;
+    height: auto;
+    max-height: 250mm;
+    overflow: visible;
     page-break-before: avoid;
     page-break-inside: avoid;
+  }
+
+  .mermaid svg {
+    width: auto;
+    max-width: 180mm;
+    height: auto;
+    max-height: 240mm;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   /* Keep headings and their content together (#52).
@@ -383,8 +474,6 @@ tr:nth-child(even) {
   }
 
   .mermaid svg {
-    width: 190mm !important;
-    height: 250mm !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -399,18 +488,6 @@ h3 { counter-increment: h3c; }
 h2:before { content: counter(h2c) ". "; }
 h3:before { content: counter(h2c) "." counter(h3c) " "; }
 
-.mermaid svg text {
-  font-size: 14px !important;
-}
-
-.mermaid svg .edgeLabel {
-  font-size: 12px !important;
-}
-
-.mermaid svg .edgePath path {
-  stroke-width: 2px !important;
-}
-
-.mermaid svg .edgePath path {
-  stroke-width: 2px !important;
-}
+/* Mermaid sizes its own text and strokes relative to the SVG viewBox.
+   Forcing absolute values here (14px/2px !important) broke that scaling and
+   flattened every diagram, so no overrides are applied. */
