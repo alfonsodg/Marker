@@ -28,70 +28,132 @@ dark mode, and a reworked interface.
 
 ### Updated Libraries
 
-- **Mermaid 10.9.1** — all diagram types: flowchart, sequence, class, state, ER,
-  journey, gitgraph, mindmap, timeline, pie, quadrant, sankey, and more
+- **Mermaid 12.2.0** — configured exactly like GitHub, so diagrams wrap their
+  labels instead of stretching into a flat strip. All diagram types: flowchart,
+  sequence, class, state, ER, journey, gitgraph, mindmap, timeline, pie,
+  quadrant, sankey, and more
 - **KaTeX 0.16.21** — full LaTeX math rendering
 - **Highlight.js 11.11.1** — syntax highlighting for 190+ languages
+- **gtksourceview-4** — current editor widget, replacing the 3.x series
 
-### CLI Export
+### Export and printing
 
-- `marker file.md -o output.pdf` — export to PDF with Mermaid diagrams
-- `marker /dir/ -b -o /output/` — batch export all .md files to PDF
-- `marker /dir/ -b -o combined.pdf --merge` — merge all into single PDF
-- `marker file.md -o output.pdf --watch` — auto re-export on file changes
-- `marker file.md -o output.pdf --landscape` — landscape orientation
-- `marker file.md -o output.pdf --no-border` — remove diagram borders
+- **Quick PDF** (`Ctrl+E`) — exports beside the source file with the same name,
+  with an overwrite prompt and a result dialog that can open the folder
+- **Export dialog** — PDF, HTML, LaTeX, RTF, ODT and DOCX, with format filters
+  shown only when pandoc is available
+- **Print** (`Ctrl+P`) — native print dialog with page setup
+- **Presentation mode** — documents with a YAML `beamer` class are exported as
+  slides: landscape, one slide per page, and the diagram sizing follows the
+  slide area
+- **Batch export** — a whole directory to PDF, optionally merged into one file
+
+### CLI
+
+```bash
+neomarker file.md -o output.pdf          # export to PDF with Mermaid diagrams
+neomarker /dir/ -b -o /output/           # batch export all .md files
+neomarker /dir/ -b -o combined.pdf --merge  # merge into a single PDF
+neomarker file.md -o output.pdf --watch  # re-export on every save
+neomarker file.md -o output.pdf --landscape
+neomarker file.md -o output.pdf --no-border
+neomarker file.md -e | -p | -d | -w     # editor, preview, dual pane, dual window
+```
 
 ### Editor
 
-- **Search and replace** (Replace / Replace All buttons in search bar)
-- **Dark mode** preview with Mermaid diagram support
-- **Drag & drop** images into editor (png, jpg, gif, svg, webp)
-- **Scroll sync** between editor and preview in dual-pane mode
-- **TOC sidebar** with document outline from headings
+- **Formatting toolbar** — bold, italic, monospace, link, table, Mermaid and
+  sketcher, with tooltips naming each accelerator
+- **Search and replace** with Replace and Replace All
+- **Outline sidebar** built from the document headings, click to jump
+- **Scroll sync** between editor and preview, with a toggle to disable it
+- **Drag and drop** images into the editor (png, jpg, gif, svg, webp)
 - **Persistent zoom** per editor tab
-- **Keyboard shortcuts**: Ctrl+T (table), Ctrl+Shift+M (mermaid template),
-  Ctrl+K (link)
-- **Emoji support**: `:rocket:` → 🚀, `:warning:` → ⚠️, `:white_check_mark:` → ✅
+- **Syntax highlighting** on by default, with a bundled light theme
+- **Dark mode** for the whole interface and the preview, toggled from the menu
+- **Emoji shortcodes**: `:rocket:` → 🚀, `:warning:` → ⚠️, `:white_check_mark:` → ✅
 
-### PDF Export
+### PDF output
 
-- **Page numbers** at bottom of each page
-- **Styled tables** with borders, striping, and padding
-- **Syntax highlighting** colors preserved in PDF
+- **Page numbers** at the bottom of every page
+- **Styled tables** with borders, striping, padding and fixed column widths
+- **Headings kept with their tables** — no orphan headings at a page break
+- **Diagram palette** separating container boxes from the nodes inside them
+- **Syntax highlighting** colours preserved
 - **Link URLs** shown in parentheses after link text
 - **Heading numbering** (1. Title, 1.1 Subtitle) via YAML `numbering: true`
 - **One diagram per page** in A4 format
 
-### Code Quality
+### Code quality
 
 - Memory leaks fixed (GObject dispose/finalize)
 - Buffer over-reads fixed (null terminators)
-- 282 lines of dead code removed
 - Test suite with 19 tests (`meson test`)
 - CI/CD with GitHub Actions
 
 ## Features
 
-- View and edit markdown documents
-- HTML and LaTeX conversion with [scidown](https://github.com/Mandarancio/scidown/)
-  - YAML headers, document classes, beamer/presentation mode
-  - Table of Contents, equations, figures, references
-- TeX math rendering with [KaTeX](https://katex.org/) or [MathJax](https://mathjax.org/)
-- Diagrams with [Mermaid](https://mermaid.js.org/) (flowchart, sequence, class,
-  state, ER, gantt, pie, mindmap, timeline, gitgraph, and more)
+### Editing features
+
+- View and edit markdown documents with a live preview
+- Four layouts: editor only, preview only, dual pane and dual window
+- GtkSourceView editor with syntax highlighting, line numbers, right margin,
+  auto indent, tab width and optional spaces-instead-of-tabs
+- Find and replace, with Replace and Replace All
+- Outline sidebar generated from the document headings; click an entry to jump
+- Scroll sync from editor to preview, with a toggle
+- Drag and drop images into the editor (png, jpg, gif, svg, webp)
+- Persistent zoom level per editor tab
+- Spell checking with language selection
+- Sketch editor for drawing figures and inserting them inline
+
+### Markdown support
+
+- YAML front matter with document classes and metadata
+- Beamer presentation mode: a `beamer` document class exports one slide per page
+- Table of contents, equations, figures and cross-references
+- TeX math through [KaTeX](https://katex.org/) or
+  [MathJax](https://mathjax.org/)
+- Diagrams with [Mermaid](https://mermaid.js.org/) — flowchart, sequence,
+  class, state, ER, gantt, pie, mindmap, timeline, gitgraph and more — with
+  automatic repair of common syntax mistakes
 - Plotting with [charter](https://github.com/Mandarancio/charter/)
-- Syntax highlighting with [highlight.js](https://highlightjs.org/)
-- Integrated sketch editor
-- Export: PDF, HTML, LaTeX, RTF, ODT, DOCX (via [pandoc](https://pandoc.org/))
-- Custom CSS and syntax themes
-- Native GTK+3 application
+- Syntax highlighting in code blocks with
+  [highlight.js](https://highlightjs.org/) (190+ languages)
+- Emoji shortcodes such as `:rocket:` or `:white_check_mark:`
+
+### Export formats
+
+- Quick PDF beside the source file, with overwrite prompt and result dialog
+- Export dialog for PDF, HTML, LaTeX, RTF, ODT and DOCX
+- Print with the native dialog
+- Batch export a directory of markdown files to PDF
+- Merge a batch into a single PDF
+- Watch mode: re-export whenever the source file changes
+- Landscape orientation and borderless diagrams for wide content
+
+### Appearance
+
+- Custom CSS themes for the preview
+- Syntax themes for the editor
+- Dark mode for the interface and the preview
+- Light and dark diagram palettes that separate containers from nodes
+
+### Platform support
+
+- Native GTK+3 application, translated into multiple languages
+- Full command-line interface for scripted exports
 
 ## Screenshots
 
-![scrot.png](help/C/figures/scrot.png)
+Dual pane with syntax highlighting, live preview, tables and math:
 
-![scrot1.png](help/C/figures/scrot1.png)
+![Dual pane with live preview](help/C/figures/neomarker-editor.png)
+
+Mermaid diagrams and sequence diagrams, rendered with the same configuration
+GitHub uses:
+
+![Mermaid diagrams](help/C/figures/neomarker-diagrams.png)
 
 ## Installation
 
@@ -177,20 +239,77 @@ neomarker document.md -w    # dual window
 
 ## Keyboard Shortcuts
 
+### Documents
+
 | Shortcut | Action |
-| ---------- | -------- |
-| Ctrl+T | Insert table template |
-| Ctrl+K | Insert link |
-| Ctrl+Shift+M | Insert Mermaid diagram template |
+| -------- | -------- |
+| Ctrl+N | New document |
+| Ctrl+O | Open document |
+| Ctrl+Shift+O | Open document in a new window |
+| Ctrl+S | Save |
+| Ctrl+Shift+S | Save with a new name |
+| Ctrl+W | Close document |
+| Ctrl+Shift+W | Close window |
+
+### Editing
+
+| Shortcut | Action |
+| -------- | -------- |
 | Ctrl+B | Bold |
 | Ctrl+I | Italic |
 | Ctrl+M | Monospace |
-| Ctrl+F | Find |
-| Ctrl+R | Refresh preview |
+| Ctrl+K | Insert link |
+| Ctrl+T | Insert table template |
+| Ctrl+Shift+M | Insert Mermaid diagram template |
 | Ctrl+D | Open sketcher |
-| Ctrl+N | New tab |
+| Ctrl+F | Find and replace |
+
+### View
+
+| Shortcut | Action |
+| -------- | -------- |
+| Ctrl+R | Refresh preview |
+| Ctrl+= | Reset preview zoom |
+| Ctrl++ | Zoom in |
+| Ctrl+- | Zoom out |
+| F12 | Toggle outline sidebar |
+| F11 | Toggle fullscreen |
+| Ctrl+1 | Editor only |
+| Ctrl+2 | Preview only |
+| Ctrl+3 | Dual pane |
+| Ctrl+4 | Dual window |
+
+### Export
+
+| Shortcut | Action |
+| -------- | -------- |
+| Ctrl+E | Quick PDF beside the file |
+| Ctrl+P | Print |
+
+### Window
+
+| Shortcut | Action |
+| -------- | -------- |
 | Ctrl+Shift+N | New window |
 | Ctrl+Q | Quit |
+
+## Mermaid diagram repair
+
+Hand-written Mermaid blocks often fail to render because of small syntax
+mistakes. NeoMarker repairs the common ones before handing the block to
+Mermaid, so the diagram appears instead of an error:
+
+- A missing direction on `graph` or `flowchart` is filled in (`graph TD`)
+- Unclosed quotes, `[` and `(` in node labels are closed
+- Parentheses inside an edge label are removed — Mermaid's parser rejects
+  `A -->|text (x)| B`
+- CRLF line endings, a UTF-8 BOM and stray control characters are normalised
+
+Only ` ```mermaid ` blocks are touched; every other fence and all surrounding
+text pass through byte for byte.
+
+Repair happens only when Mermaid rendering is enabled, so a document exported
+with diagrams turned off is never altered.
 
 ## Credits and licence
 
