@@ -31,7 +31,7 @@
 
 #include "marker.h"
 
-#define MARKER_PROJECT_URL "https://github.com/alfonsodg/Marker"
+#define MARKER_PROJECT_URL "https://github.com/alfonsodg/NeoMarker"
 
 GtkApplication* app;
 

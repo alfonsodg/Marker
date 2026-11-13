@@ -1,8 +1,8 @@
 #!/bin/bash
-# Build Marker AppImage
+# Build NeoMarker AppImage
 set -e
 
-APP=Marker
+APP=NeoMarker
 APPDIR="$APP.AppDir"
 
 # Build
@@ -24,8 +24,8 @@ EOF
 chmod +x "$APPDIR/AppRun"
 
 # Desktop and icon
-cp "$APPDIR/usr/share/applications/com.github.fabiocolacio.marker.desktop" "$APPDIR/"
-cp "$APPDIR/usr/share/icons/hicolor/scalable/apps/com.github.fabiocolacio.marker.svg" "$APPDIR/"
+cp "$APPDIR/usr/share/applications/io.github.alfonsodg.neomarker.desktop" "$APPDIR/"
+cp "$APPDIR/usr/share/icons/hicolor/scalable/apps/io.github.alfonsodg.neomarker.svg" "$APPDIR/"
 
 # Download appimagetool if not present
 if [ ! -f appimagetool ]; then
@@ -34,6 +34,6 @@ if [ ! -f appimagetool ]; then
 fi
 
 # Build AppImage
-ARCH=x86_64 ./appimagetool "$APPDIR" "Marker-Enhanced-x86_64.AppImage"
+ARCH=x86_64 ./appimagetool "$APPDIR" "NeoMarker-x86_64.AppImage"
 rm -rf "$APPDIR"
-echo "AppImage created: Marker-Enhanced-x86_64.AppImage"
+echo "AppImage created: NeoMarker-x86_64.AppImage"

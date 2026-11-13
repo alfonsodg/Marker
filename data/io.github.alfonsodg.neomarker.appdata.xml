@@ -30,23 +30,23 @@
   <screenshots>
     <screenshot type="default">
       <caption>The main view</caption>
-      <image>https://raw.githubusercontent.com/alfonsodg/Marker/master/help/C/figures/scrot1.png</image>
+      <image>https://raw.githubusercontent.com/alfonsodg/NeoMarker/master/help/C/figures/scrot1.png</image>
     </screenshot>
     <screenshot>
       <caption>Some plotting</caption>
-      <image>https://raw.githubusercontent.com/alfonsodg/Marker/master/help/C/figures/scrot2.png</image>
+      <image>https://raw.githubusercontent.com/alfonsodg/NeoMarker/master/help/C/figures/scrot2.png</image>
     </screenshot>
     <screenshot>
       <caption>The sketch editor</caption>
-      <image>https://raw.githubusercontent.com/alfonsodg/Marker/master/help/C/figures/sketcher.png</image>
+      <image>https://raw.githubusercontent.com/alfonsodg/NeoMarker/master/help/C/figures/sketcher.png</image>
     </screenshot>
   </screenshots>
 
   <developer_name>Fábio Colácio</developer_name>
-  <url type="homepage">https://github.com/alfonsodg/Marker</url>
-  <url type="bugtracker">https://github.com/alfonsodg/Marker/issues</url>
-  <url type="vcs-browser">https://github.com/alfonsodg/Marker</url>
-  <url type="translate">https://github.com/alfonsodg/Marker/tree/master/po</url>
+  <url type="homepage">https://github.com/alfonsodg/NeoMarker</url>
+  <url type="bugtracker">https://github.com/alfonsodg/NeoMarker/issues</url>
+  <url type="vcs-browser">https://github.com/alfonsodg/NeoMarker</url>
+  <url type="translate">https://github.com/alfonsodg/NeoMarker/tree/master/po</url>
 
   <provides>
     <binary>marker</binary>

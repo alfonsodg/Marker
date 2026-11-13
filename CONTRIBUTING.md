@@ -15,7 +15,8 @@ There are only a few rules:
 ## Coding Style
 
 The following guidelines only apply for the core parts of the app. Changes
-to upstream libraries such as *hoedown* and *charter* should try to match the styles of those projects.
+to upstream libraries such as *hoedown* and *charter* should try to match the
+styles of those projects.
 
 ### General
 
@@ -23,10 +24,12 @@ to upstream libraries such as *hoedown* and *charter* should try to match the st
 * There is always a space before opening parentheses
 * Curly braces are on their own lines
 * When declaring pointer-type variables, the ``*`` is paired with the variable name
-* Since we are working heavily with gnome libraries, use glib types and functions over C standards when possible
+* Since we are working heavily with gnome libraries, use glib types and
+  functions over C standards when possible
   * Use ``gchar *`` instead of ``char *``
   * Use ``g_malloc ()`` and ``g_free ()`` over ``malloc ()`` and ``free ()``
-  * Use ``g_debug ()`` and ``g_warning ()`` (never ``g_print ()`` in production code)
+  * Use ``g_debug ()`` and ``g_warning ()`` (never ``g_print ()`` in
+    production code)
   * etc...
 * Namespacing
   * All filenames are prefaced with ``marker-``
@@ -105,20 +108,23 @@ size_allocated_cb (GtkWidget     *widget,
 }
 
 ```
+
 ## Releases
 
 When making a release, do all of the following:
 
 1. Update the version number in the ``meson.build``
-2. Add a release into ``data/com.github.fabiocolacio.marker.appdata.xml``
-3. Validate: ``appstream-util validate-relax data/com.github.fabiocolacio.marker.appdata.xml``
-4. Build and test: ``meson setup builddir && ninja -C builddir && meson test -C builddir``
+2. Add a release into ``data/io.github.alfonsodg.neomarker.appdata.xml``
+3. Validate: ``appstream-util validate-relax data/io.github.alfonsodg.neomarker.appdata.xml``
+4. Build and test:
+   ``meson setup builddir && ninja -C builddir && meson test -C builddir``
 5. Tag: ``git tag -a vYYYY.MM.DD -m "Release vYYYY.MM.DD"``
-6. Build release tarball: ``DESTDIR=/tmp/pkg meson install -C builddir && cd /tmp/pkg && tar czf marker-enhanced-*.tar.gz .``
+6. Build release tarball:
+   ``DESTDIR=/tmp/pkg meson install -C builddir && cd /tmp/pkg && tar czf neomarker-*.tar.gz .``
 7. Create GitHub release and upload tarball
 8. Update AUR packages:
-   - ``marker-enhanced-bin``: update SHA256 in PKGBUILD, regenerate .SRCINFO
-   - ``marker-enhanced-git``: auto-updates (builds from master)
+   * ``marker-enhanced-bin``: update SHA256 in PKGBUILD, regenerate .SRCINFO
+   * ``marker-enhanced-git``: auto-updates (builds from master)
 
 ### Version Numbering
 
@@ -130,7 +136,9 @@ e.g. ``2018.04.25``.
 
 When making a release on GitHub, you will be prompted to write
 release notes. The notes should list every change between the
-previous release and the new one. The first section should list new features, and the second section should list bug fixes.
+previous release and the new one. The first section should list new features,
+and the second section should list bug fixes.
 
-An easy way to check what has been changed since the previous release is by finding the previous release in GitHub, and clicking the link that says
+An easy way to check what has been changed since the previous release is by
+finding the previous release in GitHub, and clicking the link that says
 "X commits to master since this release".

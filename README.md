@@ -1,4 +1,4 @@
-# ![Marker](data/com.github.fabiocolacio.marker.svg) Marker Enhanced
+# ![NeoMarker](data/io.github.alfonsodg.neomarker.svg) NeoMarker
 
 Enhanced fork of [Marker](https://github.com/fabiocolacio/Marker) — a markdown editor
 for Linux made with GTK+-3.0.
@@ -6,7 +6,7 @@ for Linux made with GTK+-3.0.
 This fork adds security fixes, modern JS libraries, powerful CLI export,
 dark mode, and more.
 
-[![Build](https://github.com/alfonsodg/Marker/actions/workflows/build.yml/badge.svg)](https://github.com/alfonsodg/Marker/actions/workflows/build.yml)
+[![Build](https://github.com/alfonsodg/NeoMarker/actions/workflows/build.yml/badge.svg)](https://github.com/alfonsodg/NeoMarker/actions/workflows/build.yml)
 
 ## What's New (vs upstream)
 
@@ -88,17 +88,17 @@ dark mode, and more.
 
 ```bash
 # Prebuilt binary (recommended, instant install)
-yay -S marker-enhanced-bin
+yay -S neomarker-bin
 
 # Build from source (compiles latest master)
-yay -S marker-enhanced-git
+yay -S neomarker-git
 ```
 
 ### Flatpak
 
 ```bash
 # Build from manifest
-flatpak-builder --install build com.github.fabiocolacio.marker.yml
+flatpak-builder --install build io.github.alfonsodg.neomarker.yml
 ```
 
 ### AppImage
@@ -106,7 +106,7 @@ flatpak-builder --install build com.github.fabiocolacio.marker.yml
 ```bash
 # Build portable AppImage
 ./build-appimage.sh
-./Marker-Enhanced-x86_64.AppImage
+./NeoMarker-x86_64.AppImage
 ```
 
 ### From Source
@@ -124,8 +124,8 @@ flatpak-builder --install build com.github.fabiocolacio.marker.yml
 #### Build
 
 ```bash
-git clone https://github.com/alfonsodg/Marker.git
-cd Marker
+git clone https://github.com/alfonsodg/NeoMarker.git
+cd NeoMarker
 git submodule update --init --recursive
 meson setup builddir
 ninja -C builddir
@@ -137,31 +137,31 @@ sudo ninja -C builddir install
 
 ```bash
 # Open file in editor
-marker document.md
+neomarker document.md
 
 # Export to PDF (with Mermaid diagrams)
-marker document.md -o output.pdf
+neomarker document.md -o output.pdf
 
 # Batch export entire directory
-marker /path/to/docs/ -b -o /path/to/pdfs/
+neomarker /path/to/docs/ -b -o /path/to/pdfs/
 
 # Merge all into single PDF
-marker /path/to/docs/ -b -o combined.pdf --merge
+neomarker /path/to/docs/ -b -o combined.pdf --merge
 
 # Watch mode — re-export on every save
-marker document.md -o output.pdf --watch
+neomarker document.md -o output.pdf --watch
 
 # Landscape orientation for wide diagrams
-marker document.md -o output.pdf --landscape
+neomarker document.md -o output.pdf --landscape
 
 # Export to HTML
-marker document.md -o output.html
+neomarker document.md -o output.html
 
 # Editor modes
-marker document.md -e    # editor only
-marker document.md -p    # preview only
-marker document.md -d    # dual pane
-marker document.md -w    # dual window
+neomarker document.md -e    # editor only
+neomarker document.md -p    # preview only
+neomarker document.md -d    # dual pane
+neomarker document.md -w    # dual window
 ```
 
 ## Keyboard Shortcuts
@@ -184,6 +184,6 @@ marker document.md -w    # dual window
 ## Credits
 
 - Original project: [Fabio Colacio](https://github.com/fabiocolacio/Marker)
-- Enhanced fork: [Alfonso de la Guarda](https://github.com/alfonsodg/Marker)
+- Enhanced fork: [Alfonso de la Guarda](https://github.com/alfonsodg/NeoMarker)
 - Markdown engine: [scidown](https://github.com/Mandarancio/scidown/) by Martino
   Ferrari
