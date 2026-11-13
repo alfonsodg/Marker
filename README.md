@@ -115,7 +115,7 @@ flatpak-builder --install build com.github.fabiocolacio.marker.yml
 
 - meson >= 0.37.0
 - gtk3-devel >= 3.20
-- gtksourceview3-devel
+- gtksourceview4-devel
 - webkit2gtk-4.1-devel
 - gtkspell3-devel
 - itstool
